@@ -9,30 +9,37 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserSchema = exports.User = void 0;
+exports.MessageSchema = exports.ConversationSchema = exports.Conversation = exports.Message = void 0;
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
-let User = class User extends mongoose_2.Document {
+let Message = class Message {
 };
-exports.User = User;
+exports.Message = Message;
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
-], User.prototype, "username", void 0);
+], Message.prototype, "role", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
-], User.prototype, "email", void 0);
-__decorate([
-    (0, mongoose_1.Prop)({ required: true }),
-    __metadata("design:type", String)
-], User.prototype, "password", void 0);
-__decorate([
-    (0, mongoose_1.Prop)({ type: Array, default: [] }),
-    __metadata("design:type", Array)
-], User.prototype, "conversationHistory", void 0);
-exports.User = User = __decorate([
+], Message.prototype, "content", void 0);
+exports.Message = Message = __decorate([
     (0, mongoose_1.Schema)()
-], User);
-exports.UserSchema = mongoose_1.SchemaFactory.createForClass(User);
-//# sourceMappingURL=user.schema.js.map
+], Message);
+let Conversation = class Conversation extends mongoose_2.Document {
+};
+exports.Conversation = Conversation;
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Conversation.prototype, "userId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: [Message], default: [] }),
+    __metadata("design:type", Array)
+], Conversation.prototype, "messages", void 0);
+exports.Conversation = Conversation = __decorate([
+    (0, mongoose_1.Schema)({ timestamps: true })
+], Conversation);
+exports.ConversationSchema = mongoose_1.SchemaFactory.createForClass(Conversation);
+exports.MessageSchema = mongoose_1.SchemaFactory.createForClass(Message);
+//# sourceMappingURL=conversation.schema.js.map

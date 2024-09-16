@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import axios from 'axios';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -46,7 +47,8 @@ export function ChatUi() {
   const [currentView, setCurrentView] = useState<'chat' | 'grammar' | 'pronunciation' | 'feedback'>('chat')
   const [newConversationMethod, setNewConversationMethod] = useState<'voice' | 'media' | 'text' | null>(null)
 
-  const handleSend = () => {
+  const handleSend = async () => {
+    //add user message to conversation
     if (input.trim() && currentConversation) {
       const newMessage: Message = { role: 'user', content: input }
       const updatedConversation = {
@@ -54,11 +56,35 @@ export function ChatUi() {
         messages: [...currentConversation.messages, newMessage],
         lastUsed: new Date()
       }
+      //clear input field
+      setInput('')
+
       setCurrentConversation(updatedConversation)
+
+      //send message to the backend
+      try {
+        const response = await axios.post('http://localhost:3000/chat', {
+          message: input
+        })
+  
+        const aiMessage: Message = {
+          role: 'ai',
+          content: response.data.reply // Assuming backend returns { reply: "AI's response" }
+        }
+  
+        const updatedWithAIResponse = {
+          ...updatedConversation,
+          messages: [...updatedConversation.messages, aiMessage],
+          lastUsed: new Date()
+        }
+  
+        setCurrentConversation(updatedWithAIResponse)
+      } catch (error) {
+        console.error('Error fetching AI response:', error)
+      }
       setConversations(conversations.map(conv => 
         conv.id === currentConversation.id ? updatedConversation : conv
       ))
-      setInput('')
     }
   }
 

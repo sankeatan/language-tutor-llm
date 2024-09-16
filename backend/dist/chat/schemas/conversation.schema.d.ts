@@ -21,19 +21,24 @@
 /// <reference types="mongoose/types/utility" />
 /// <reference types="mongoose/types/validation" />
 /// <reference types="mongoose/types/virtuals" />
-/// <reference types="mongoose" />
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose/types/inferrawdoctype" />
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateConversationDto } from '../chat/dto/update-conversation.dto';
-export declare class UsersController {
-    private readonly usersService;
-    constructor(usersService: UsersService);
-    createUser(createUserDto: CreateUserDto): Promise<{
-        userId: import("mongoose").Types.ObjectId;
-        user: import("./schemas/user.schema").User;
-    }>;
-    getUserById(id: string): Promise<import("./schemas/user.schema").User>;
-    updateConversation(id: string, updateConversationDto: UpdateConversationDto): Promise<import("./schemas/user.schema").User>;
+import { Document } from 'mongoose';
+export declare class Message {
+    role: string;
+    content: string;
 }
+export declare class Conversation extends Document {
+    userId: string;
+    messages: Message[];
+}
+export declare const ConversationSchema: import("mongoose").Schema<Conversation, import("mongoose").Model<Conversation, any, any, any, Document<unknown, any, Conversation> & Conversation & Required<{
+    _id: unknown;
+}>, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Conversation, Document<unknown, {}, import("mongoose").FlatRecord<Conversation>> & import("mongoose").FlatRecord<Conversation> & Required<{
+    _id: unknown;
+}>>;
+export declare const MessageSchema: import("mongoose").Schema<Message, import("mongoose").Model<Message, any, any, any, Document<unknown, any, Message> & Message & {
+    _id: import("mongoose").Types.ObjectId;
+}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Message, Document<unknown, {}, import("mongoose").FlatRecord<Message>> & import("mongoose").FlatRecord<Message> & {
+    _id: import("mongoose").Types.ObjectId;
+}>;

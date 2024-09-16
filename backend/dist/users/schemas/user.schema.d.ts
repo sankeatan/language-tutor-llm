@@ -23,14 +23,16 @@
 /// <reference types="mongoose/types/virtuals" />
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose/types/inferrawdoctype" />
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 export declare class User extends Document {
+    _id: Types.ObjectId;
     username: string;
     email: string;
+    password: string;
     conversationHistory: string[];
 }
 export declare const UserSchema: import("mongoose").Schema<User, import("mongoose").Model<User, any, any, any, Document<unknown, any, User> & User & Required<{
-    _id: unknown;
+    _id: Types.ObjectId;
 }>, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, User, Document<unknown, {}, import("mongoose").FlatRecord<User>> & import("mongoose").FlatRecord<User> & Required<{
-    _id: unknown;
+    _id: Types.ObjectId;
 }>>;

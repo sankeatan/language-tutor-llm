@@ -21,9 +21,8 @@ let UsersService = class UsersService {
     constructor(userModel) {
         this.userModel = userModel;
     }
-    async createUser(user) {
-        const { username, email } = user;
-        const newUser = new this.userModel({ username, email });
+    async createUser(createUserDto) {
+        const newUser = new this.userModel(createUserDto);
         return newUser.save();
     }
     async findUserById(userId) {

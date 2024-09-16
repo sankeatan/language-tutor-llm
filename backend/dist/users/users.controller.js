@@ -16,13 +16,14 @@ exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
 const users_service_1 = require("./users.service");
 const create_user_dto_1 = require("./dto/create-user.dto");
-const update_conversation_dto_1 = require("./dto/update-conversation.dto");
+const update_conversation_dto_1 = require("../chat/dto/update-conversation.dto");
 let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
     }
     async createUser(createUserDto) {
-        return await this.usersService.createUser(createUserDto);
+        const user = await this.usersService.createUser(createUserDto);
+        return { userId: user._id, user };
     }
     async getUserById(id) {
         return await this.usersService.findUserById(id);

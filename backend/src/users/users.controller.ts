@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Get, Param, Patch } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateConversationDto } from './dto/update-conversation.dto';
+import { UpdateConversationDto } from '../chat/dto/update-conversation.dto';
 
 @Controller('users')  // Base route for all user-related endpoints (e.g., /users)
 export class UsersController {
@@ -10,7 +10,8 @@ export class UsersController {
   // Create a new user
   @Post()
   async createUser(@Body() createUserDto: CreateUserDto) {
-    return await this.usersService.createUser(createUserDto);
+    const user = await this.usersService.createUser(createUserDto);
+    return { userId: user._id, user };
   }
 
   // Get a user by ID (e.g., fetching user profile or conversation history)
