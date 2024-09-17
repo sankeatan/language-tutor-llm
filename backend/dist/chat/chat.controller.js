@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatController = void 0;
 const common_1 = require("@nestjs/common");
+const passport_1 = require("@nestjs/passport");
 const chat_service_1 = require("./chat.service");
 const create_conversation_dto_1 = require("./dto/create-conversation.dto");
 const update_conversation_dto_1 = require("./dto/update-conversation.dto");
@@ -40,6 +41,7 @@ let ChatController = class ChatController {
 };
 exports.ChatController = ChatController;
 __decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Post)('create'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -47,6 +49,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "createConversation", null);
 __decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Put)(':conversationId'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -54,6 +57,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "updateConversation", null);
 __decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Post)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)('message')),
@@ -62,6 +66,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "getChatResponse", null);
 __decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -69,6 +74,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "deleteConversation", null);
 __decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Get)('user/:userId'),
     __param(0, (0, common_1.Param)('userId')),
     __metadata("design:type", Function),

@@ -1,4 +1,5 @@
-import { Controller, Post, Body, Param, Delete, Get, Put } from '@nestjs/common';
+import { Controller, Post, UseGuards, Req, Body, Param, Delete, Get, Put } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { ChatService } from './chat.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
@@ -7,14 +8,15 @@ import { UpdateConversationDto } from './dto/update-conversation.dto';
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
+  @UseGuards(AuthGuard('jwt'))  // Protect this route
   // Create a new conversation
   @Post('create')
   async createConversation(@Body() createConversationDto: CreateConversationDto) {
     const conversation = await this.chatService.createConversation(createConversationDto);
     return { conversationId: conversation._id, conversation };  // Return conversation with MongoDB _id
-
   }
   
+  @UseGuards(AuthGuard('jwt'))
   //Update conversation
   @Put(':conversationId')
   async updateConversation(
@@ -23,6 +25,7 @@ export class ChatController {
     return this.chatService.updateConversation(updateConversationDto);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   // Get GPT-4 response and update the conversation
   @Post(':id')
   async getChatResponse(
@@ -32,12 +35,14 @@ export class ChatController {
     return this.chatService.getGPT4Response(conversationId, message);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   // Delete a conversation
   @Delete(':id')
   async deleteConversation(@Param('id') conversationId: string) {
     return this.chatService.deleteConversation(conversationId);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   // Get all conversations for a user
   @Get('user/:userId')
   async getAllConversations(@Param('userId') userId: string) {

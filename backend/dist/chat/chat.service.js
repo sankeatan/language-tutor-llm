@@ -21,7 +21,7 @@ const openai_1 = require("openai");
 let ChatService = class ChatService {
     constructor(conversationModel) {
         this.conversationModel = conversationModel;
-        const openai = new openai_1.OpenAI({
+        this.openai = new openai_1.OpenAI({
             apiKey: process.env.OPENAI_API_KEY,
         });
     }
@@ -32,10 +32,10 @@ let ChatService = class ChatService {
         });
         const savedConversation = await newConversation.save();
         const conversationId = savedConversation._id;
-        const userMessage = dto.messages[0].content;
+        const userMessage = savedConversation.messages[0].content;
         const gptResponse = await this.getGPT4Response(conversationId.toString(), userMessage);
-        await savedConversation.save();
         savedConversation.messages.push({ role: 'assistant', content: gptResponse });
+        await savedConversation.save();
         return savedConversation;
     }
     async getGPT4Response(conversationId, message) {

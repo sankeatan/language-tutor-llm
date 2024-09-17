@@ -12,7 +12,7 @@ export class User extends Document {
   email: string;
 
   @Prop({ required: true })
-  password: string; // Or store hash if you're doing authentication
+  password: string; //Hashed
 
   @Prop({ type: Array, default: [] })
   conversationHistory: string[];

@@ -13,7 +13,7 @@ export class ChatService {
   constructor(
     @InjectModel(Conversation.name) private conversationModel: Model<Conversation>,
   ) {
-      const openai = new OpenAI({
+      this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,  // Store API Key in .env file
     });
   }
@@ -32,15 +32,15 @@ export class ChatService {
     const conversationId = savedConversation._id;
 
     //User's initial message
-    const userMessage = dto.messages[0].content;
+    const userMessage = savedConversation.messages[0].content;
 
     // Send the user's message to ChatGPT and get the response, pass conversationId
     const gptResponse = await this.getGPT4Response(conversationId.toString(), userMessage);
 
-    await savedConversation.save();  // Save the updated conversation with GPT response
-
     // Update the conversation with GPT-4's response
     savedConversation.messages.push({ role: 'assistant', content: gptResponse });
+
+    await savedConversation.save();  // Save the updated conversation with GPT response
 
     return savedConversation; // savedConversation will now have a generated _id field
   }
@@ -76,7 +76,8 @@ export class ChatService {
     }
   
     conversation.messages.push(...dto.messages);
-    return conversation.save();
+    await conversation.save();
+    return conversation;
   }
 
   // Delete a conversation
