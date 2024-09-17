@@ -62,7 +62,8 @@ let ChatService = class ChatService {
             throw new Error('Conversation not found');
         }
         conversation.messages.push(...dto.messages);
-        return conversation.save();
+        await conversation.save();
+        return conversation;
     }
     async deleteConversation(conversationId) {
         return this.conversationModel.findByIdAndDelete(conversationId);

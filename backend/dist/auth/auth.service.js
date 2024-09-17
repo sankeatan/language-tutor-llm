@@ -39,7 +39,9 @@ let AuthService = class AuthService {
             throw new Error('Invalid credentials');
         }
         const payload = { userId: user._id, email: user.email };
-        const token = this.jwtService.sign(payload);
+        const token = this.jwtService.sign(payload, {
+            secret: process.env.JWT_SECRET,
+        });
         return { token, userId: user._id };
     }
     async validateUser(userId) {

@@ -25,9 +25,12 @@
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose/types/inferrawdoctype" />
 import { AuthService } from './auth.service';
+import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
 export declare class AuthController {
     private readonly authService;
-    constructor(authService: AuthService);
+    private readonly jwtService;
+    constructor(authService: AuthService, jwtService: JwtService);
     register(body: {
         email: string;
         password: string;
@@ -45,4 +48,8 @@ export declare class AuthController {
         token: string;
         userId: import("mongoose").Types.ObjectId;
     }>;
+    verifyToken(req: Request): {
+        valid: boolean;
+        decoded: any;
+    };
 }
