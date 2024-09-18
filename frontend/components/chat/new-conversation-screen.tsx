@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MicIcon, PaperclipIcon, SendIcon } from "lucide-react";
 
 interface NewConversationScreenProps {
-  startNewConversation: (method: "voice" | "media" | "text") => void;
+  startNewConversation: () => void;
 }
 
 export const NewConversationScreen: React.FC<NewConversationScreenProps> = ({
@@ -16,7 +16,7 @@ export const NewConversationScreen: React.FC<NewConversationScreenProps> = ({
         variant="outline"
         size="lg"
         className="w-40 h-40 sm:w-48 sm:h-48 rounded-full flex flex-col items-center justify-center text-center p-4"
-        onClick={() => startNewConversation("voice")}
+        onClick={startNewConversation}
       >
         <MicIcon className="h-8 w-8 sm:h-12 sm:w-12 mb-2" />
         <span className="text-xs sm:text-sm">Start a voice conversation</span>
@@ -25,7 +25,7 @@ export const NewConversationScreen: React.FC<NewConversationScreenProps> = ({
         variant="outline"
         size="lg"
         className="w-40 h-40 sm:w-48 sm:h-48 rounded-full flex flex-col items-center justify-center text-center p-4"
-        onClick={() => startNewConversation("media")}
+        onClick={startNewConversation}
       >
         <PaperclipIcon className="h-8 w-8 sm:w-12 sm:h-12 mb-2" />
         <span className="text-xs sm:text-sm">Upload media for your tutor</span>
@@ -34,7 +34,7 @@ export const NewConversationScreen: React.FC<NewConversationScreenProps> = ({
         variant="outline"
         size="lg"
         className="w-40 h-40 sm:w-48 sm:h-48 rounded-full flex flex-col items-center justify-center text-center p-4"
-        onClick={() => startNewConversation("text")}
+        onClick={startNewConversation}
       >
         <SendIcon className="h-8 w-8 sm:h-12 sm:w-12 mb-2" />
         <span className="text-xs sm:text-sm">Send a text message</span>

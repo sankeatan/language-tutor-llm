@@ -37,4 +37,4 @@ exports.JwtAuthGuard = JwtAuthGuard = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [jwt_1.JwtService])
 ], JwtAuthGuard);
-//# sourceMappingURL=jwtguard.js.map
+//# sourceMappingURL=jwt.guard.js.map

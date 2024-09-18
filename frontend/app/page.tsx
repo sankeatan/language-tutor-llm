@@ -1,8 +1,4 @@
-import { ChatUi } from "@/components/pages/chat-ui";
-import Image from "next/image";
-import { useEffect } from 'react';
-import axios from 'axios';
-import { redirect } from 'next/navigation'
+import { ChatUi } from "@/components/chat/chat-ui";
 
 export default function Home() {
     return (

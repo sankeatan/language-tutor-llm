@@ -44,8 +44,14 @@ export const InputArea: React.FC<InputAreaProps> = ({
           onChange={(e) => setInput(e.target.value)}
           className="flex-grow mx-2"
         />
-        <Button onClick={onSendMessage} disabled={!input.trim()}>
-          <SendIcon className="h-4 w-4" />
+        <Button
+            onClick={() => {
+            console.log("Button clicked"); // Check if the button click is registered
+            onSendMessage();
+        }}
+        disabled={!input.trim()}
+>
+        <SendIcon className="h-4 w-4" />
         </Button>
       </div>
     </div>
