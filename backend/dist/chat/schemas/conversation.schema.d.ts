@@ -30,7 +30,9 @@ export declare class Message {
 }
 export declare class Conversation extends Document {
     userId: string;
+    title: string;
     messages: Message[];
+    lastUsed: Date;
 }
 export declare const ConversationSchema: import("mongoose").Schema<Conversation, import("mongoose").Model<Conversation, any, any, any, Document<unknown, any, Conversation> & Conversation & Required<{
     _id: unknown;

@@ -27,8 +27,10 @@ let ChatService = class ChatService {
     }
     async createConversation(dto) {
         const newConversation = new this.conversationModel({
+            title: dto.title,
             userId: dto.userId,
             messages: dto.messages,
+            lastUsed: Date.now()
         });
         const savedConversation = await newConversation.save();
         const conversationId = savedConversation._id;
@@ -57,7 +59,10 @@ let ChatService = class ChatService {
         }
     }
     async updateConversation(dto) {
-        const conversation = await this.conversationModel.findById(dto.conversationId);
+        const conversation = await this.conversationModel.findByIdAndUpdate(dto.conversationId, {
+            $push: { messages: dto.messages[0] },
+            lastUsed: Date.now(),
+        }, { new: true }).exec();
         if (!conversation) {
             throw new Error('Conversation not found');
         }
@@ -69,7 +74,10 @@ let ChatService = class ChatService {
         return this.conversationModel.findByIdAndDelete(conversationId);
     }
     async getAllConversations(userId) {
-        return this.conversationModel.find({ userId }).exec();
+        console.log("Fetching conversations for userId:", userId);
+        const conversations = await this.conversationModel.find({ userId }).select('title lastUsed').exec();
+        console.log("Found conversations:", conversations);
+        return conversations;
     }
 };
 exports.ChatService = ChatService;

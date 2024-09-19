@@ -96,6 +96,9 @@ export class ChatService {
 
   // Get all conversations for a user
   async getAllConversations(userId: string): Promise<Conversation[]> {
-    return this.conversationModel.find({ userId }).select('title lastUsed').exec();
+    console.log("Fetching conversations for userId:", userId); // Log userId
+    const conversations = await this.conversationModel.find({ userId }).select('title lastUsed').exec();
+    console.log("Found conversations:", conversations);
+    return conversations
   }
 }

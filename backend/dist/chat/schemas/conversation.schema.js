@@ -34,9 +34,17 @@ __decorate([
     __metadata("design:type", String)
 ], Conversation.prototype, "userId", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Conversation.prototype, "title", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ type: [Message], default: [] }),
     __metadata("design:type", Array)
 ], Conversation.prototype, "messages", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: Date.now }),
+    __metadata("design:type", Date)
+], Conversation.prototype, "lastUsed", void 0);
 exports.Conversation = Conversation = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Conversation);

@@ -33,7 +33,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
       console.log(`Trying: http://localhost:4000/chat/user/:${userId}`)
 
       try {
-        const response = await axios.get(`http://localhost:4000/chat/user/:${userId}`, {
+        const response = await axios.get(`http://localhost:4000/chat/user/${userId}`, {
           withCredentials: true,
           headers: {
             Authorization: `Bearer ${token}`,
@@ -41,7 +41,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         });
         console.log("Chat history data", response)
         // Assuming the response is { conversations: [...] }
-        setConversations(response.data.conversations);
+        setConversations(response.data);
       } catch (err) {
         setError('Failed to fetch conversations');
         console.error(err);
