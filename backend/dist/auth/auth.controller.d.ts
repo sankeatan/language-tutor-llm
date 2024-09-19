@@ -26,7 +26,7 @@
 /// <reference types="mongoose/types/inferrawdoctype" />
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 export declare class AuthController {
     private readonly authService;
     private readonly jwtService;
@@ -52,4 +52,5 @@ export declare class AuthController {
         valid: boolean;
         decoded: any;
     };
+    logout(res: Response): Response<any, Record<string, any>>;
 }

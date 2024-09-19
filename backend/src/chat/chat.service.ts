@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Conversation } from './schemas/conversation.schema';
+import { Conversation, Message } from './schemas/conversation.schema';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { OpenAI } from 'openai';
@@ -21,8 +21,10 @@ export class ChatService {
   // Create a new conversation
   async createConversation(dto: CreateConversationDto): Promise<Conversation> {
     const newConversation = new this.conversationModel({
+      title: dto.title,
       userId: dto.userId,
       messages: dto.messages,
+      lastUsed: Date.now()
     });
 
     //Create convo
@@ -70,7 +72,14 @@ export class ChatService {
 
   // Update an existing conversation
   async updateConversation(dto: UpdateConversationDto): Promise<Conversation> {
-    const conversation = await this.conversationModel.findById(dto.conversationId);
+    const conversation = await this.conversationModel.findByIdAndUpdate(
+      dto.conversationId,
+    {
+      $push: { messages: dto.messages[0] }, // Add the new message
+      lastUsed: Date.now(), // Update lastUsed timestamp
+    },
+    {new: true}
+  ).exec();
     if (!conversation) {
       throw new Error('Conversation not found');
     }
@@ -87,6 +96,6 @@ export class ChatService {
 
   // Get all conversations for a user
   async getAllConversations(userId: string): Promise<Conversation[]> {
-    return this.conversationModel.find({ userId }).exec();
+    return this.conversationModel.find({ userId }).select('title lastUsed').exec();
   }
 }

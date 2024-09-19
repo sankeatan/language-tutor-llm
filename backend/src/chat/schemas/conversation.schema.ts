@@ -18,8 +18,15 @@ export class Conversation extends Document {
   @Prop({ required: true })
   userId: string; // The ID of the user to whom this conversation belongs
 
+  @Prop({ required: true })
+  title: string; // Title for the conversation (e.g., 'New Conversation')
+
   @Prop({ type: [Message], default: [] })
-  messages: Message[];
+  messages: Message[]; //messages
+
+  @Prop({ default: Date.now })
+  lastUsed: Date; // Last time this conversation was used
+  
 }
 
 // Create the schema factories for Mongoose

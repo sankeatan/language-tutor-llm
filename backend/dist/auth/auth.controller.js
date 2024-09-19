@@ -44,6 +44,10 @@ let AuthController = class AuthController {
             throw new common_1.UnauthorizedException('Invalid token');
         }
     }
+    logout(res) {
+        res.clearCookie('token');
+        return res.status(200).json({ message: 'Logged out successfully' });
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -67,6 +71,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "verifyToken", null);
+__decorate([
+    (0, common_1.Post)('logout'),
+    __param(0, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "logout", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService,

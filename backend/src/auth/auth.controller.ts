@@ -1,7 +1,7 @@
-import { Controller, Post, Body, Get, Req, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, Get, Req, Res, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -36,5 +36,12 @@ export class AuthController {
     } catch (err) {
       throw new UnauthorizedException('Invalid token');
     }
+  }
+  
+  @Post('logout')
+  logout(@Res() res: Response) {
+    // Clear the cookie
+    res.clearCookie('token');
+    return res.status(200).json({ message: 'Logged out successfully' });
   }
 }

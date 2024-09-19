@@ -13,14 +13,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const getUserIdFromToken = (): string | null => {
+export const getUserIdFromToken = (): string  => {
   const token = document.cookie
     .split('; ')
     .find((row) => row.startsWith('token='))
     ?.split('=')[1];
     if (!token) {
       console.error('No token found in cookies');
-      return null;
+      return '';
     }
     try {
       // Decode the token to extract the userId
@@ -28,7 +28,7 @@ export const getUserIdFromToken = (): string | null => {
       return decodedToken.userId;
     } catch (error) {
       console.error('Error decoding token:', error);
-      return null;
+      return '';
     }
   };
 
@@ -52,5 +52,5 @@ export function getRandomGreeting() {
       .split('; ')
       .find((row) => row.startsWith('token='));
     
-    return cookie ? cookie.split('=')[1] : null;
+    return cookie ? cookie.split('=')[1] : '';
   }

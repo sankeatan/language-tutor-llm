@@ -2,11 +2,14 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(req: NextRequest) {
+  console.log('Middleware is being triggered');
  // Check if the 'token' cookie is present
  const token = req.cookies.get('token');
+ console.log("Token received:", token); // Debugging log
 
  // If no token, redirect to the login page
  if (!token) {
+  console.log("No token found, redirecting to login."); // Debugging log
    return NextResponse.redirect(new URL('/login', req.url));
  }
 
@@ -17,8 +20,10 @@ export function middleware(req: NextRequest) {
    },
  })
    .then((verifyResponse) => {
+    console.log("Token verification response:", verifyResponse.ok); // Debugging log
      // If the token is invalid, redirect to login
      if (!verifyResponse.ok) {
+      console.log("Token is invalid, redirecting to login."); // Debugging log
        return NextResponse.redirect(new URL('/login', req.url));
      }
 
@@ -34,5 +39,5 @@ export function middleware(req: NextRequest) {
 
 // Apply the middleware to specific routes
 export const config = {
- matcher: ['/', '/dashboard', '/chat/:path*'],
+ matcher: ['/:path*'],
 };

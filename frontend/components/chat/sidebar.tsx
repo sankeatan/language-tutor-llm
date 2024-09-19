@@ -1,15 +1,21 @@
-'use client'
+'use client';
 
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { PlusIcon, TrashIcon } from "lucide-react"
-import { format } from "date-fns"
-import { Conversation } from "@/types/types"
-import { getTokenFromCookies, getUserIdFromToken } from "@/lib/utils"
-import axios from "axios"
+
+import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { PlusIcon, MenuIcon, TrashIcon } from "lucide-react";
+import { ConversationList } from './conversation-list';
+import { getTokenFromCookies, getUserIdFromToken } from "@/lib/utils";
+import axios from 'axios';
+import { Conversation, Message } from "@/types/types";
+import { getRandomGreeting } from '@/lib/utils';
+
 
 
 interface SidebarProps {
+    
+  userId: string;
+  token: string;
   conversations: Conversation[];
   onNewConversation: (conversation: Conversation) => void;
   onSelectConversation: (conversation: Conversation) => void;
@@ -17,18 +23,37 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
+  userId,
+  token,
   conversations,
   onNewConversation,
   onSelectConversation,
   onDeleteConversation
 }) => {
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
+
+    // Toggle sidebar collapse
+    const toggleSidebar = () => {
+        setIsCollapsed(!isCollapsed);
+    };
+
     const handleCreateNewConversation = async () => {
         const token = getTokenFromCookies();
         const userId = getUserIdFromToken();
+        const greeting = getRandomGreeting();
+        const title = `New Conversation ${conversations.length + 1}`;
+        const message: Message = {role: 'user', content: greeting}
+
+        if (!token || !userId) {
+            console.error('Token or userId is missing!');
+            return;
+          }
+
         try {
             const response = await axios.post(
               'http://localhost:4000/chat/create',
-              { userId, messages: [] },
+              { userId, title, messages: message },
               {
                 withCredentials: true,
                 headers: {
@@ -42,8 +67,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             // Now create a new conversation object
             const newConversation: Conversation = {
               id: conversationData._id,
-              title: `New Conversation ${conversations.length + 1}`,
-              messages: [], // No messages yet
+              title: title,
+              messages: [message],
               lastUsed: new Date(),
             };
       
@@ -55,40 +80,43 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }
         };
   return (
-    <div className="w-[300px] sm:w-[400px] bg-white dark:bg-gray-800 p-4">
-      <h2 className="text-lg font-semibold mb-4">Conversations</h2>
-      <Button 
-        variant="outline" 
-        className="w-full mb-4"
-        onClick={()=> {handleCreateNewConversation}}
-      >
-        <PlusIcon className="mr-2 h-4 w-4" /> New Conversation
-      </Button>
-      <ScrollArea className="h-[calc(100vh-180px)]">
-        {conversations.map((conv) => (
-          <div key={conv.id} className="flex items-center mb-2">
-            <Button
-              variant="ghost"
-              className="w-full justify-start mr-2"
-              onClick={() => onSelectConversation(conv)}
-            >
-              <div className="flex flex-col items-start">
-                <span>{conv.title}</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {format(conv.lastUsed, 'MMM d, yyyy')}
-                </span>
-              </div>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onDeleteConversation(conv.id)}
-            >
-              <TrashIcon className="h-4 w-4" />
-            </Button>
-          </div>
-        ))}
-      </ScrollArea>
+    <div className={`transition-all duration-300 ${isCollapsed ? 'w-[50px]' : 'w-[300px] sm:w-[400px]'} bg-white dark:bg-gray-800 p-4`}>
+      {/* Collapsible Menu Button */}
+      <div className="flex justify-between mb-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleSidebar}
+        >
+          <MenuIcon className="h-6 w-6" />
+        </Button>
+        {!isCollapsed && (
+          <h2 className="text-lg font-semibold">Conversations</h2>
+        )}
+      </div>
+
+      {!isCollapsed && (
+        <>
+          {/* New Conversation Button */}
+          <Button
+            variant="outline"
+            className="w-full mb-4"
+            onClick={handleCreateNewConversation}
+          >
+            <PlusIcon className="mr-2 h-4 w-4" /> New Conversation
+          </Button>
+
+          {/* Conversation List */}
+          <ConversationList
+            userId={userId}
+            token={token}
+            conversations={conversations}
+            onSelectConversation={onSelectConversation}
+            onDeleteConversation={onDeleteConversation}
+            
+          />
+        </>
+      )}
     </div>
   );
 };

@@ -3,8 +3,13 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { UserIcon } from "lucide-react"
+import { FC } from "react"
 
-export const UserDropdownMenu: React.FC = () => {
+interface UserDropdownMenuProps {
+    handleLogout: () => void;
+  }
+
+export const UserDropdownMenu: FC<UserDropdownMenuProps> = ({ handleLogout }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -15,7 +20,7 @@ export const UserDropdownMenu: React.FC = () => {
       <DropdownMenuContent align="end">
         <DropdownMenuItem>Profile</DropdownMenuItem>
         <DropdownMenuItem>Settings</DropdownMenuItem>
-        <DropdownMenuItem>Log out</DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MessageList } from './message-list';
 import { InputArea } from './input-area';
 import { NewConversationScreen } from './new-conversation-screen';
@@ -12,6 +12,7 @@ import { Conversation, Message } from '@/types/types'
 import { GrammarLessons } from '../pages/grammar-lessons';
 import { PronunciationLessons } from '../pages/pronunciation-lessons';
 import { UserFeedback } from '../pages/user-feedback';
+import Login  from '@/components/pages/login'
 
 export function ChatUi() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -19,8 +20,20 @@ export function ChatUi() {
   const [input, setInput] = useState('');
   const [currentView, setCurrentView] = useState<'chat' | 'grammar' | 'pronunciation' | 'feedback'>('chat')
   const [newConversationMethod, setNewConversationMethod] = useState<'voice' | 'media' | 'text' | null>(null);
+  const [userId, setUserId] = useState<string>('');
+  const [token, setToken] = useState<string>('');
 
-  
+  useEffect(() => {
+    const fetchedUserId = getUserIdFromToken();
+    const fetchedToken = getTokenFromCookies();
+
+    setUserId(fetchedUserId);
+    setToken(fetchedToken);
+  }, []);
+
+  if (!userId) {
+    return <Login setUserId={setUserId} />;
+  }
 
   // Function to handle sending the message
   const handleSendMessage = async () => {
@@ -190,6 +203,8 @@ export function ChatUi() {
 
         {/* Sidebar */}
             <Sidebar
+                userId={userId}
+                token={token}
                 conversations={conversations}
                 onNewConversation={handleNewConversation}
                 onSelectConversation={handleSelectConversation}
