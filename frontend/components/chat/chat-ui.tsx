@@ -144,11 +144,12 @@ export function ChatUi() {
     console.log("userId: ", userId)
     const greeting = getRandomGreeting();
     console.log("greeting: ", greeting)
+    const title = `New Conversation ${conversations.length + 1}`
 
     // Prepare a new conversation locally (with a temporary ID)
     const newTempConversation: Conversation = {
         id: (conversations.length + 1).toString(),
-        title: `New Conversation ${conversations.length + 1}`,
+        title: title,
         messages: [{ role: 'user', content: greeting }], // Greeting as the first message
         lastUsed: new Date(),
     };
@@ -160,6 +161,7 @@ export function ChatUi() {
     try {
         const response = await axios.post('http://localhost:4000/chat/create', {
             userId,
+            title,
             messages: [{ role: 'user', content: greeting }]
         }, {
             withCredentials: true, // Ensure that cookies (with JWT) are sent
@@ -175,7 +177,7 @@ export function ChatUi() {
       // Update the conversation with the real backend ID
         const updatedConversation: Conversation = {
             id: conversationData._id, // Use MongoDB _id from backend
-            title: `New Conversation ${conversations.length}`,
+            title: title,
             messages: conversationData.messages, // Retain the greeting message
             lastUsed: new Date(),
         };
