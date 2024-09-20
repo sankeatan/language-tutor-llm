@@ -9,45 +9,37 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MessageSchema = exports.ConversationSchema = exports.Conversation = exports.Message = void 0;
+exports.ChatAssistantSchema = exports.ChatAssistant = void 0;
 const mongoose_1 = require("@nestjs/mongoose");
-const mongoose_2 = require("mongoose");
-let Message = class Message {
+let ChatAssistant = class ChatAssistant {
 };
-exports.Message = Message;
+exports.ChatAssistant = ChatAssistant;
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
-], Message.prototype, "role", void 0);
+], ChatAssistant.prototype, "name", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
-], Message.prototype, "content", void 0);
-exports.Message = Message = __decorate([
-    (0, mongoose_1.Schema)()
-], Message);
-let Conversation = class Conversation extends mongoose_2.Document {
-};
-exports.Conversation = Conversation;
+], ChatAssistant.prototype, "personality", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
-], Conversation.prototype, "userId", void 0);
+], ChatAssistant.prototype, "userId", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
-    __metadata("design:type", String)
-], Conversation.prototype, "assistant", void 0);
-__decorate([
-    (0, mongoose_1.Prop)({ type: [Message], default: [] }),
     __metadata("design:type", Array)
-], Conversation.prototype, "messages", void 0);
+], ChatAssistant.prototype, "interests", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ default: Date.now }),
-    __metadata("design:type", Date)
-], Conversation.prototype, "lastUsed", void 0);
-exports.Conversation = Conversation = __decorate([
-    (0, mongoose_1.Schema)({ timestamps: true })
-], Conversation);
-exports.ConversationSchema = mongoose_1.SchemaFactory.createForClass(Conversation);
-exports.MessageSchema = mongoose_1.SchemaFactory.createForClass(Message);
-//# sourceMappingURL=conversation.schema.js.map
+    (0, mongoose_1.Prop)({ required: false }),
+    __metadata("design:type", String)
+], ChatAssistant.prototype, "instructions", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], ChatAssistant.prototype, "background", void 0);
+exports.ChatAssistant = ChatAssistant = __decorate([
+    (0, mongoose_1.Schema)()
+], ChatAssistant);
+exports.ChatAssistantSchema = mongoose_1.SchemaFactory.createForClass(ChatAssistant);
+//# sourceMappingURL=chat-assistant.schema.js.map

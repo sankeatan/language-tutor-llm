@@ -1,19 +1,27 @@
 'use client'
 
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import { UserDropdownMenu } from './dropdown-menu'  // Assuming you already modularized the dropdown
-import { MessageCircleIcon, BarChartIcon, BookOpenIcon, VolumeIcon } from "lucide-react"
-import { useRouter } from 'next/router';
+import { MessageCircleIcon, BarChartIcon, BookOpenIcon, VolumeIcon, ContactIcon } from "lucide-react"
+import { useRouter } from 'next/navigation';
 import axios from "axios";
 import { FC } from "react";
 
 interface HeaderMenuProps {
-  currentView: 'chat' | 'grammar' | 'pronunciation' | 'feedback';
-  setCurrentView: (view: 'chat' | 'grammar' | 'pronunciation' | 'feedback') => void;
+  currentView: 'chat' | 'grammar' | 'pronunciation' | 'feedback' | 'contacts' | 'assistantBuilder';
+  setCurrentView: (view: 'chat' | 'grammar' | 'pronunciation' | 'feedback' | 'contacts' | 'assistantBuilder') => void;
 
 }
 
 export const HeaderMenu: React.FC<HeaderMenuProps> = ({ currentView, setCurrentView }) => {
+    const [isClient, setIsClient] = useState(false);
+    const router = useRouter();
+
+    useEffect(() => {
+        // Ensure the code runs only on the client
+        setIsClient(true);
+    }, []);
     const handleLogout = async () => {
         try {
             // Call backend logout to clear the cookie
@@ -40,6 +48,10 @@ export const HeaderMenu: React.FC<HeaderMenuProps> = ({ currentView, setCurrentV
         </Button>
         <Button variant="ghost" size="icon" onClick={() => setCurrentView('feedback')}>
           <BarChartIcon className="h-6 w-6" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={() => setCurrentView('contacts')}>
+            <ContactIcon className="h-6 w-6" />
+            <span className="sr-only">Contact List</span>
         </Button>
       </div>
       <h1 className="text-lg font-semibold">GPTutor</h1>

@@ -23,24 +23,21 @@
 /// <reference types="mongoose/types/virtuals" />
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose/types/inferrawdoctype" />
-import { Document } from 'mongoose';
-export declare class Message {
-    role: string;
-    content: string;
+import { ChatService } from '../chat/chat.service';
+import { Model } from 'mongoose';
+import { ChatAssistant } from 'src/assistants/dto/schemas/chat-assistant.schema';
+export declare class AssistantService {
+    private readonly chatService;
+    private readonly chatAssistantModel;
+    constructor(chatService: ChatService, chatAssistantModel: Model<ChatAssistant>);
+    generateChatAssistant(createChatAssistantDto: {
+        personality: string;
+        interests: string[];
+        userId: string;
+    }): Promise<{
+        conversationId: unknown;
+        name: any;
+        background: any;
+    }>;
+    getAllAssistantsForUser(userId: string): Promise<ChatAssistant[]>;
 }
-export declare class Conversation extends Document {
-    userId: string;
-    assistant: string;
-    messages: Message[];
-    lastUsed: Date;
-}
-export declare const ConversationSchema: import("mongoose").Schema<Conversation, import("mongoose").Model<Conversation, any, any, any, Document<unknown, any, Conversation> & Conversation & Required<{
-    _id: unknown;
-}>, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Conversation, Document<unknown, {}, import("mongoose").FlatRecord<Conversation>> & import("mongoose").FlatRecord<Conversation> & Required<{
-    _id: unknown;
-}>>;
-export declare const MessageSchema: import("mongoose").Schema<Message, import("mongoose").Model<Message, any, any, any, Document<unknown, any, Message> & Message & {
-    _id: import("mongoose").Types.ObjectId;
-}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Message, Document<unknown, {}, import("mongoose").FlatRecord<Message>> & import("mongoose").FlatRecord<Message> & {
-    _id: import("mongoose").Types.ObjectId;
-}>;

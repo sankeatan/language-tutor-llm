@@ -4,8 +4,17 @@ export type Message = {
   };
   
   export type Conversation = {
-    id: string;  // Change number to string to match the MongoDB ID type
+    id: string; 
     title: string;
     messages: Message[];
     lastUsed: Date;
+  };
+
+  export type ChatAssistant = {
+    id: string;
+    userId: string;
+    name: string;
+    personality: string;
+    interests: string;
+    background: string;
   };

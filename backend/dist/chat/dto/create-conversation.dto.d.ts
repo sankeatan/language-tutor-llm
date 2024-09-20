@@ -5,4 +5,5 @@ export declare class CreateConversationDto {
         role: string;
         content: string;
     }[];
+    readonly assistant: string;
 }

@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Conversation, Message } from './schemas/conversation.schema';
+import { Conversation } from './schemas/conversation.schema';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { OpenAI } from 'openai';
+import { ChatAssistant } from 'src/assistants/dto/schemas/chat-assistant.schema';
 
 @Injectable()
 export class ChatService {
@@ -24,7 +25,8 @@ export class ChatService {
       title: dto.title,
       userId: dto.userId,
       messages: dto.messages,
-      lastUsed: Date.now()
+      lastUsed: Date.now(),
+      assistant: dto.assistant
     });
 
     //Create convo

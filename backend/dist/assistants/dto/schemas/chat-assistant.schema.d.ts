@@ -24,23 +24,16 @@
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose/types/inferrawdoctype" />
 import { Document } from 'mongoose';
-export declare class Message {
-    role: string;
-    content: string;
-}
-export declare class Conversation extends Document {
+export declare class ChatAssistant {
+    name: string;
+    personality: string;
     userId: string;
-    assistant: string;
-    messages: Message[];
-    lastUsed: Date;
+    interests: string[];
+    instructions: string;
+    background: string;
 }
-export declare const ConversationSchema: import("mongoose").Schema<Conversation, import("mongoose").Model<Conversation, any, any, any, Document<unknown, any, Conversation> & Conversation & Required<{
-    _id: unknown;
-}>, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Conversation, Document<unknown, {}, import("mongoose").FlatRecord<Conversation>> & import("mongoose").FlatRecord<Conversation> & Required<{
-    _id: unknown;
-}>>;
-export declare const MessageSchema: import("mongoose").Schema<Message, import("mongoose").Model<Message, any, any, any, Document<unknown, any, Message> & Message & {
+export declare const ChatAssistantSchema: import("mongoose").Schema<ChatAssistant, import("mongoose").Model<ChatAssistant, any, any, any, Document<unknown, any, ChatAssistant> & ChatAssistant & {
     _id: import("mongoose").Types.ObjectId;
-}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Message, Document<unknown, {}, import("mongoose").FlatRecord<Message>> & import("mongoose").FlatRecord<Message> & {
+}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, ChatAssistant, Document<unknown, {}, import("mongoose").FlatRecord<ChatAssistant>> & import("mongoose").FlatRecord<ChatAssistant> & {
     _id: import("mongoose").Types.ObjectId;
 }>;

@@ -30,7 +30,8 @@ let ChatService = class ChatService {
             title: dto.title,
             userId: dto.userId,
             messages: dto.messages,
-            lastUsed: Date.now()
+            lastUsed: Date.now(),
+            assistant: dto.assistant
         });
         const savedConversation = await newConversation.save();
         const conversationId = savedConversation._id;
