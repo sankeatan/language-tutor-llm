@@ -34,7 +34,7 @@ export default function SignupPage() {
     }
 
     try {
-        const response = await axios.post('http://localhost:4000/auth/register', { username, email, password });
+        await axios.post('http://localhost:4000/auth/register', { username, email, password });
         router.push('/login') }
         catch (err) {
             setError('Registration failed');

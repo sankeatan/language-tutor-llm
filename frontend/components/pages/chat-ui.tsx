@@ -21,7 +21,6 @@ export function ChatUi() {
   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
   const [input, setInput] = useState('');
   const [currentView, setCurrentView] = useState<'chat' | 'grammar' | 'pronunciation' | 'feedback' | 'contacts' | 'assistantBuilder'>('chat')
-  const [newConversationMethod, setNewConversationMethod] = useState<'voice' | 'media' | 'text' | null>(null);
   const [userId, setUserId] = useState<string>('');
   const [token, setToken] = useState<string>('');
 
@@ -201,7 +200,7 @@ export function ChatUi() {
   return (
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
        {/* Header */}
-        <HeaderMenu currentView={currentView} setCurrentView={setCurrentView} />
+        <HeaderMenu setCurrentView={setCurrentView} />
         
         <div className="flex flex-grow">
 

@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { PlusIcon, MenuIcon, TrashIcon } from "lucide-react";
+import { PlusIcon, MenuIcon } from "lucide-react";
 import { ConversationList } from './conversation-list';
 import { getTokenFromCookies, getUserIdFromToken } from "@/lib/utils";
 import axios from 'axios';

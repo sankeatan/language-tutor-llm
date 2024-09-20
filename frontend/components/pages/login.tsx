@@ -81,7 +81,7 @@ export default function Login({ setUserId }: { setUserId: (id: string) => void }
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <p>Don't have an account? <Link href="/signup" className="text-blue-500 hover:underline">Sign up</Link></p>
+          <p>Don&apos;t have an account? <Link href="/signup" className="text-blue-500 hover:underline">Sign up</Link></p>
         </CardFooter>
       </Card>
     </div>
