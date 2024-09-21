@@ -2,7 +2,7 @@ import { AssistantService } from './assistant.service';
 export declare class AssistantController {
     private readonly assistantService;
     constructor(assistantService: AssistantService);
-    getAllAssistants(userId: string): Promise<import("./dto/schemas/chat-assistant.schema").ChatAssistant[]>;
+    getAllAssistants(userId: string): Promise<import("./schemas/chat-assistant.schema").ChatAssistant[]>;
     generateassistant(createChatAssistantDto: {
         personality: string;
         interests: string[];

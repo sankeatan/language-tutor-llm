@@ -4,17 +4,17 @@ import { useEffect, useState } from 'react';
 import { MessageList } from '../chat/message-list';
 import { InputArea } from '../chat/input-area';
 import { NewConversationScreen } from '../chat/new-conversation-screen';
-import { Sidebar } from '../chat/sidebar'
-import { HeaderMenu } from '../chat/header-menu'
 import axios from 'axios';
 import { getUserIdFromToken, getTokenFromCookies, getRandomGreeting } from '@/lib/utils';
 import { Conversation, Message } from '@/types/types'
 import { GrammarLessons } from './grammar-lessons';
 import Contacts from './contacts';
 import { PronunciationLessons } from './pronunciation-lessons';
-import { UserFeedback } from './user-feedback';
+import Feedback from './feedback';
 import Login  from '@/components/pages/login'
 import ChatAssistantBuilder from './chat-assistant-builder';
+import { ArrowLeftIcon } from 'lucide-react';
+import { Button } from '../ui/button';
 
 export function ChatUi() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -153,6 +153,8 @@ export function ChatUi() {
         title: title,
         messages: [{ role: 'user', content: greeting }], // Greeting as the first message
         lastUsed: new Date(),
+        assistant: '',
+        assistantName: ''
     };
 
     // Set the new conversation in the state
@@ -181,6 +183,8 @@ export function ChatUi() {
             title: title,
             messages: conversationData.messages, // Retain the greeting message
             lastUsed: new Date(),
+            assistant: conversationData.assisstant,
+            assistantName: conversationData.assistantName
         };
 
         // Clear input field
@@ -197,23 +201,22 @@ export function ChatUi() {
     }
   };
 
+  const goBackToMessages = () => {
+    setCurrentConversation(null);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-       {/* Header */}
-        <HeaderMenu setCurrentView={setCurrentView} />
+        {/* Back Button */}
+        {currentConversation && (
+          <div className="p-4">
+            <Button variant="ghost" size="icon" onClick={goBackToMessages}>
+              <ArrowLeftIcon className="h-6 w-6" />
+            </Button>
+          </div>
+      )}
         
-        <div className="flex flex-grow">
-
-        {/* Sidebar */}
-            <Sidebar
-                userId={userId}
-                token={token}
-                conversations={conversations}
-                onNewConversation={handleNewConversation}
-                onSelectConversation={handleSelectConversation}
-                onDeleteConversation={handleDeleteConversation}
-        />
-        
+        <div className="flex flex-">
         {/* Main content area */}
       <div className="flex-grow">
         {currentView === 'chat' && (
@@ -236,7 +239,7 @@ export function ChatUi() {
 
         {currentView === 'grammar' && <GrammarLessons />}
         {currentView === 'pronunciation' && <PronunciationLessons />}
-        {currentView === 'feedback' && <UserFeedback />}
+        {currentView === 'feedback' && <Feedback />}
         {currentView === 'contacts' && <Contacts setCurrentView={setCurrentView}/>}
         {currentView === 'assistantBuilder' && <ChatAssistantBuilder />}
       </div>

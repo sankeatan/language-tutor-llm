@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ChatAssistant } from 'src/assistants/dto/schemas/chat-assistant.schema';
+import { ChatAssistant } from 'src/assistants/schemas/chat-assistant.schema';
 
 @Injectable()
 export class ContactService {

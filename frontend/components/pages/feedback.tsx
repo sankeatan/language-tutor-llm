@@ -11,7 +11,7 @@ const userProgress = [
   { skill: "Writing", progress: 65, feedback: "Improving. Pay attention to essay structure." },
 ]
 
-export function UserFeedback() {
+export default function Feedback() {
   return (
     <div className="h-screen bg-gray-100 p-4">
       <h1 className="text-2xl font-bold mb-4">Your Progress</h1>

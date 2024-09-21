@@ -27,11 +27,11 @@ let ChatService = class ChatService {
     }
     async createConversation(dto) {
         const newConversation = new this.conversationModel({
-            title: dto.title,
             userId: dto.userId,
             messages: dto.messages,
             lastUsed: Date.now(),
-            assistant: dto.assistant
+            assistant: dto.assistant,
+            assistantName: dto.assistantName
         });
         const savedConversation = await newConversation.save();
         const conversationId = savedConversation._id;
@@ -76,7 +76,7 @@ let ChatService = class ChatService {
     }
     async getAllConversations(userId) {
         console.log("Fetching conversations for userId:", userId);
-        const conversations = await this.conversationModel.find({ userId }).select('title lastUsed').exec();
+        const conversations = await this.conversationModel.find({ userId }).select('assistant messages lastUsed assistantName').exec();
         console.log("Found conversations:", conversations);
         return conversations;
     }

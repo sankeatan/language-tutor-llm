@@ -1,9 +1,9 @@
 export declare class CreateConversationDto {
     readonly userId: string;
-    readonly title: string;
     readonly messages: {
         role: string;
         content: string;
     }[];
     readonly assistant: string;
+    readonly assistantName: string;
 }

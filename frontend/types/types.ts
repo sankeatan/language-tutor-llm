@@ -8,6 +8,8 @@ export type Message = {
     title: string;
     messages: Message[];
     lastUsed: Date;
+    assistant: string;
+    assistantName: string;
   };
 
   export type ChatAssistant = {

@@ -25,7 +25,7 @@
 /// <reference types="mongoose/types/inferrawdoctype" />
 import { ChatService } from '../chat/chat.service';
 import { Model } from 'mongoose';
-import { ChatAssistant } from 'src/assistants/dto/schemas/chat-assistant.schema';
+import { ChatAssistant } from 'src/assistants/schemas/chat-assistant.schema';
 export declare class AssistantService {
     private readonly chatService;
     private readonly chatAssistantModel;

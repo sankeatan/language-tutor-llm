@@ -17,7 +17,7 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const chat_service_1 = require("../chat/chat.service");
 const mongoose_2 = require("mongoose");
-const chat_assistant_schema_1 = require("./dto/schemas/chat-assistant.schema");
+const chat_assistant_schema_1 = require("./schemas/chat-assistant.schema");
 let AssistantService = class AssistantService {
     constructor(chatService, chatAssistantModel) {
         this.chatService = chatService;
@@ -39,30 +39,26 @@ let AssistantService = class AssistantService {
       Personality: ${personality}
       Interests: ${interests.join(', ')}
 
-      With only two things, a culturally appropriate name for Spanish language partner and a culturally appropriate background 
+      With only two things, a culturally appropriate name for a Spanish language partner and a culturally appropriate background 
       that includes birth year, birth place, current country, relatives, current and past friends, current and past jobs, and 
-      any other details that can help give the asisstant a history. Tie in the traits that have been listed to the background as well.
+      any other details that can help give the assistant a history. Tie in the traits that have been listed to the background as well.
 
       Respond with a json using the following two keys
-      Name:
-      Background:
+      name:
+      background:
     `;
         const createConversationDto = {
             userId: userId,
-            title: `Conversation with ${personality}`,
             messages: [{ role: 'user', content: prompt, }],
             assistant: chatAssistant._id.toString(),
+            assistantName: 'temp'
         };
         const conversation = await this.chatService.createConversation(createConversationDto);
         const conversationId = conversation._id;
         const response = conversation.messages[1].content;
-        console.log(response);
         const parsedResponse = JSON.parse(response);
-        console.log(parsedResponse);
-        const name = parsedResponse.Name || 'Unknown Name';
-        const background = parsedResponse.Background || 'Unknown Background';
-        console.log(name);
-        console.log(background);
+        const name = parsedResponse.name || 'Unknown Name';
+        const background = parsedResponse.background || 'Unknown Background';
         chatAssistant.name = name;
         chatAssistant.background = background;
         await chatAssistant.save();

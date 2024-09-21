@@ -16,7 +16,7 @@ exports.ContactService = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
-const chat_assistant_schema_1 = require("../dto/schemas/chat-assistant.schema");
+const chat_assistant_schema_1 = require("../schemas/chat-assistant.schema");
 let ContactService = class ContactService {
     constructor(agentModel) {
         this.agentModel = agentModel;

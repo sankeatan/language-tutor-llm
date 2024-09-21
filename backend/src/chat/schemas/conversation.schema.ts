@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { ChatAssistant, ChatAssistantSchema } from 'src/assistants/dto/schemas/chat-assistant.schema';
+import { ChatAssistant, ChatAssistantSchema } from 'src/assistants/schemas/chat-assistant.schema';
 
 // Define the message sub-schema
 @Schema()
@@ -20,6 +20,9 @@ export class Conversation extends Document {
 
   @Prop({ required: true }) // Associate conversation with an assistant
   assistant: string
+
+  @Prop({ required: true }) // Associate conversation with an assistant
+  assistantName: string
 
   @Prop({ type: [Message], default: [] })
   messages: Message[]; //messages

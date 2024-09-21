@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ChatService } from '../chat/chat.service'
 import { CreateConversationDto } from '../chat/dto/create-conversation.dto';
 import { Model } from 'mongoose';
-import { ChatAssistant } from 'src/assistants/dto/schemas/chat-assistant.schema';
+import { ChatAssistant } from 'src/assistants/schemas/chat-assistant.schema';
 import { extractNameAndBackground } from '../common/utils'
 
 @Injectable()
@@ -32,9 +32,9 @@ export class AssistantService {
       Personality: ${personality}
       Interests: ${interests.join(', ')}
 
-      With only two things, a culturally appropriate name for Spanish language partner and a culturally appropriate background 
+      With only two things, a culturally appropriate name for a Spanish language partner and a culturally appropriate background 
       that includes birth year, birth place, current country, relatives, current and past friends, current and past jobs, and 
-      any other details that can help give the asisstant a history. Tie in the traits that have been listed to the background as well.
+      any other details that can help give the assistant a history. Tie in the traits that have been listed to the background as well.
 
       Respond with a json using the following two keys
       name:
@@ -44,9 +44,9 @@ export class AssistantService {
     // Create a conversation for this assistant
     const createConversationDto: CreateConversationDto = {
       userId: userId,
-      title: `Conversation with ${personality}`,
       messages: [{role: 'user', content: prompt,}],
       assistant: chatAssistant._id.toString(),
+      assistantName: 'temp'
     };
 
     const conversation = await this.chatService.createConversation(createConversationDto);

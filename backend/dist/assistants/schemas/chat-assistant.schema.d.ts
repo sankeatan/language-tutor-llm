@@ -21,9 +21,9 @@
 /// <reference types="mongoose/types/utility" />
 /// <reference types="mongoose/types/validation" />
 /// <reference types="mongoose/types/virtuals" />
+/// <reference types="mongoose" />
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose/types/inferrawdoctype" />
-import { Document } from 'mongoose';
 export declare class ChatAssistant {
     name: string;
     personality: string;
@@ -32,8 +32,8 @@ export declare class ChatAssistant {
     instructions: string;
     background: string;
 }
-export declare const ChatAssistantSchema: import("mongoose").Schema<ChatAssistant, import("mongoose").Model<ChatAssistant, any, any, any, Document<unknown, any, ChatAssistant> & ChatAssistant & {
+export declare const ChatAssistantSchema: import("mongoose").Schema<ChatAssistant, import("mongoose").Model<ChatAssistant, any, any, any, import("mongoose").Document<unknown, any, ChatAssistant> & ChatAssistant & {
     _id: import("mongoose").Types.ObjectId;
-}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, ChatAssistant, Document<unknown, {}, import("mongoose").FlatRecord<ChatAssistant>> & import("mongoose").FlatRecord<ChatAssistant> & {
+}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, ChatAssistant, import("mongoose").Document<unknown, {}, import("mongoose").FlatRecord<ChatAssistant>> & import("mongoose").FlatRecord<ChatAssistant> & {
     _id: import("mongoose").Types.ObjectId;
 }>;

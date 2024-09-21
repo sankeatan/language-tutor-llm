@@ -31,6 +31,7 @@ export declare class Message {
 export declare class Conversation extends Document {
     userId: string;
     assistant: string;
+    assistantName: string;
     messages: Message[];
     lastUsed: Date;
 }

@@ -4,7 +4,7 @@ import { AssistantService } from './assistant.service';
 import { AssistantController } from './assistant.controller';
 import { ChatService } from '../chat/chat.service'; 
 import { Conversation, ConversationSchema } from '../chat/schemas/conversation.schema';
-import { ChatAssistant, ChatAssistantSchema } from 'src/assistants/dto/schemas/chat-assistant.schema';
+import { ChatAssistant, ChatAssistantSchema } from 'src/assistants/schemas/chat-assistant.schema';
 import { ContactController } from './contacts/contacts.controller';
 import { ContactService } from './contacts/contacts.service';
 

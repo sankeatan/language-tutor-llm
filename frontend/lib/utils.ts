@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { jwtDecode } from "jwt-decode";
+import { format } from "date-fns";
 
 interface DecodedToken {
   userId: string;
@@ -48,9 +49,30 @@ export function getRandomGreeting() {
 }
 
   export function getTokenFromCookies() {
-    const cookie = document.cookie
-      .split('; ')
-      .find((row) => row.startsWith('token='));
-    
-    return cookie ? cookie.split('=')[1] : '';
+    if (typeof document !== 'undefined') {  // Check if we are in the browser environment
+      const cookie = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('token='));
+  
+      return cookie ? cookie.split('=')[1] : '';
+    }
+  
+    return '';  // Return an empty string if running on the server (SSR)
+  }
+
+  // Helper to format time nicely (e.g., '2:34 PM', 'Yesterday', etc.)
+  export function formatTime(lastUsed: Date) {
+    return format(new Date(lastUsed), 'MMM d, yyyy h:mm a');
+  };
+
+  // Helper to extract initials from a name
+  export function getInitials(name?: string) {
+    if (!name || typeof name !== 'string') {
+      return '';  // Return empty string if name is undefined or not a string
+    }
+  
+    const [firstName = '', lastName = ''] = name.split(' ');
+  
+    // If there's no last name, return just the first initial
+    return `${firstName.charAt(0).toUpperCase()}${lastName.charAt(0).toUpperCase()}`;
   }

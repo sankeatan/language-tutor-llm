@@ -5,7 +5,6 @@ import { Conversation } from './schemas/conversation.schema';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { OpenAI } from 'openai';
-import { ChatAssistant } from 'src/assistants/dto/schemas/chat-assistant.schema';
 
 @Injectable()
 export class ChatService {
@@ -15,18 +14,18 @@ export class ChatService {
     @InjectModel(Conversation.name) private conversationModel: Model<Conversation>,
   ) {
       this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,  // Store API Key in .env file
+      apiKey: process.env.OPENAI_API_KEY,  
     });
   }
 
   // Create a new conversation
   async createConversation(dto: CreateConversationDto): Promise<Conversation> {
     const newConversation = new this.conversationModel({
-      title: dto.title,
       userId: dto.userId,
       messages: dto.messages,
       lastUsed: Date.now(),
-      assistant: dto.assistant
+      assistant: dto.assistant,
+      assistantName: dto.assistantName
     });
 
     //Create convo
@@ -99,7 +98,7 @@ export class ChatService {
   // Get all conversations for a user
   async getAllConversations(userId: string): Promise<Conversation[]> {
     console.log("Fetching conversations for userId:", userId); // Log userId
-    const conversations = await this.conversationModel.find({ userId }).select('title lastUsed').exec();
+    const conversations = await this.conversationModel.find({ userId }).select('assistant messages lastUsed assistantName').exec();
     console.log("Found conversations:", conversations);
     return conversations
   }

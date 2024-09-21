@@ -38,6 +38,10 @@ __decorate([
     __metadata("design:type", String)
 ], Conversation.prototype, "assistant", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Conversation.prototype, "assistantName", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ type: [Message], default: [] }),
     __metadata("design:type", Array)
 ], Conversation.prototype, "messages", void 0);

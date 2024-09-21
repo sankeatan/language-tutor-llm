@@ -1,7 +1,7 @@
-import { ChatUi } from "@/components/pages/chat-ui";
+import { Messages } from "@/components/pages/messages";
 
 export default function Home() {
     return (
-    <ChatUi />
+    <Messages />
   );
 }
