@@ -47,26 +47,20 @@ let AssistantService = class AssistantService {
       name:
       background:
     `;
-        const createConversationDto = {
-            userId: userId,
-            messages: [{ role: 'user', content: prompt, }],
-            assistant: chatAssistant._id.toString(),
-            assistantName: 'temp'
-        };
-        const conversation = await this.chatService.createConversation(createConversationDto);
-        const conversationId = conversation._id;
-        const response = conversation.messages[1].content;
-        const parsedResponse = JSON.parse(response);
-        const name = parsedResponse.name || 'Unknown Name';
-        const background = parsedResponse.background || 'Unknown Background';
+        const assistantResponse = await this.chatService.getGPT4Response(prompt);
+        let name = 'Unknown Name';
+        let background = 'Unknown Background';
+        try {
+            const parsedResponse = JSON.parse(assistantResponse);
+            name = parsedResponse.name || name;
+            background = parsedResponse.background || background;
+        }
+        catch (error) {
+            console.error('Failed to parse GPT-4 response:', error);
+        }
         chatAssistant.name = name;
         chatAssistant.background = background;
         await chatAssistant.save();
-        return {
-            conversationId,
-            name,
-            background,
-        };
     }
     async getAllAssistantsForUser(userId) {
         return this.chatAssistantModel.find({ userId }).exec();

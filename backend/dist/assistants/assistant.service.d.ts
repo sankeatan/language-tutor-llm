@@ -34,10 +34,6 @@ export declare class AssistantService {
         personality: string;
         interests: string[];
         userId: string;
-    }): Promise<{
-        conversationId: unknown;
-        name: any;
-        background: any;
-    }>;
+    }): Promise<void>;
     getAllAssistantsForUser(userId: string): Promise<ChatAssistant[]>;
 }

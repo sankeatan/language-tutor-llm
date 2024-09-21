@@ -7,9 +7,5 @@ export declare class AssistantController {
         personality: string;
         interests: string[];
         userId: string;
-    }): Promise<{
-        conversationId: unknown;
-        name: any;
-        background: any;
-    }>;
+    }): Promise<void>;
 }

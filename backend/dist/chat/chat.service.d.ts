@@ -32,7 +32,7 @@ export declare class ChatService {
     private openai;
     constructor(conversationModel: Model<Conversation>);
     createConversation(dto: CreateConversationDto): Promise<Conversation>;
-    getGPT4Response(conversationId: string, message: string): Promise<string>;
+    getGPT4Response(message: string, conversationId?: string): Promise<string>;
     updateConversation(dto: UpdateConversationDto): Promise<Conversation>;
     deleteConversation(conversationId: string): Promise<Conversation>;
     getAllConversations(userId: string): Promise<Conversation[]>;

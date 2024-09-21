@@ -10,6 +10,7 @@ import { Conversation, Message } from "@/types/types";
 import { getRandomGreeting } from '@/lib/utils';
 import { HeaderMenu } from '../chat/header-menu';
 import Login from './login';
+import ChatAssistantBuilder from './chat-assistant-builder';
 
 export const Messages: React.FC = () => {
     const [userId, setUserId] = useState<string>('');
@@ -129,6 +130,7 @@ export const Messages: React.FC = () => {
         )}
         {currentView === 'contacts' && <Contacts setCurrentView={setCurrentView} />}
         {currentView === 'feedback' && <Feedback />}
+        {currentView === 'assistantBuilder' && <ChatAssistantBuilder />}
       </div>
     </div>
   );

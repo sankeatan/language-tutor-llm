@@ -49,9 +49,7 @@ const Contacts: React.FC<ContactsProps> = ({ setCurrentView }) => {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-bold mb-4">Your Contacts</h1>
-
+    <div className="p-2">
       {/* List of assistants */}
       {assistants.length > 0 ? (
         <ul className="mb-4">

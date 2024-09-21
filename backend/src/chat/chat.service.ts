@@ -49,7 +49,7 @@ export class ChatService {
   }
 
   // Get GPT-4 response and update the conversation
-  async getGPT4Response(conversationId: string, message: string): Promise<string> {
+  async getGPT4Response(message: string, conversationId?: string): Promise<string> {
     try {
       const response = await this.openai.chat.completions.create({
         model: 'gpt-4',
@@ -58,12 +58,17 @@ export class ChatService {
 
       const reply = response.choices[0].message?.content || 'No response from GPT-4';
 
-      // Update conversation with the new message and GPT response
-      await this.updateConversation({
-        conversationId: conversationId,
-        messages: [{ role: 'user', content: message }, { role: 'assistant', content: reply }],
-      });
-
+      if (conversationId) {
+        await this.updateConversation({
+          conversationId: conversationId,
+          messages: [
+            { role: 'user', content: message },
+            { role: 'assistant', content: reply },
+          ],
+        });
+      }
+  
+      // Return GPT-4's reply
       return reply;
     } catch (error) {
       console.error('Error communicating with OpenAI API', error);

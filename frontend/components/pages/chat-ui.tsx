@@ -126,17 +126,6 @@ export function ChatUi() {
     setInput('');
   };
 
-  const handleSelectConversation = (conversation: Conversation) => {
-    setCurrentConversation(conversation);
-  };
-
-  const handleDeleteConversation = (id: string) => {
-    setConversations(conversations.filter((conv) => conv.id !== id));
-    if (currentConversation && currentConversation.id === id) {
-      setCurrentConversation(null);
-    }
-  };
-
   const handleNewConversation = async () => {
     console.log("New conversation started")
     const token = getTokenFromCookies();

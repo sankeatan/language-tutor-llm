@@ -41,17 +41,22 @@ let ChatService = class ChatService {
         await savedConversation.save();
         return savedConversation;
     }
-    async getGPT4Response(conversationId, message) {
+    async getGPT4Response(message, conversationId) {
         try {
             const response = await this.openai.chat.completions.create({
                 model: 'gpt-4',
                 messages: [{ role: 'user', content: message }],
             });
             const reply = response.choices[0].message?.content || 'No response from GPT-4';
-            await this.updateConversation({
-                conversationId: conversationId,
-                messages: [{ role: 'user', content: message }, { role: 'assistant', content: reply }],
-            });
+            if (conversationId) {
+                await this.updateConversation({
+                    conversationId: conversationId,
+                    messages: [
+                        { role: 'user', content: message },
+                        { role: 'assistant', content: reply },
+                    ],
+                });
+            }
             return reply;
         }
         catch (error) {
