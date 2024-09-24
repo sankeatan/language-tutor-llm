@@ -21,19 +21,20 @@
 /// <reference types="mongoose/types/utility" />
 /// <reference types="mongoose/types/validation" />
 /// <reference types="mongoose/types/virtuals" />
-/// <reference types="mongoose" />
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose/types/inferrawdoctype" />
-export declare class ChatAssistant {
+import { Document } from 'mongoose';
+export declare class ChatAssistant extends Document {
+    assistantId: string;
     name: string;
-    personality: string;
     userId: string;
-    interests: string[];
     instructions: string;
+    personality: string;
+    interests: string[];
     background: string;
 }
-export declare const ChatAssistantSchema: import("mongoose").Schema<ChatAssistant, import("mongoose").Model<ChatAssistant, any, any, any, import("mongoose").Document<unknown, any, ChatAssistant> & ChatAssistant & {
-    _id: import("mongoose").Types.ObjectId;
-}, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, ChatAssistant, import("mongoose").Document<unknown, {}, import("mongoose").FlatRecord<ChatAssistant>> & import("mongoose").FlatRecord<ChatAssistant> & {
-    _id: import("mongoose").Types.ObjectId;
-}>;
+export declare const ChatAssistantSchema: import("mongoose").Schema<ChatAssistant, import("mongoose").Model<ChatAssistant, any, any, any, Document<unknown, any, ChatAssistant> & ChatAssistant & Required<{
+    _id: unknown;
+}>, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, ChatAssistant, Document<unknown, {}, import("mongoose").FlatRecord<ChatAssistant>> & import("mongoose").FlatRecord<ChatAssistant> & Required<{
+    _id: unknown;
+}>>;

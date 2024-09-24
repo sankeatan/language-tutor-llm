@@ -26,6 +26,9 @@ let ChatController = class ChatController {
         const conversation = await this.chatService.createConversation(createConversationDto);
         return { conversationId: conversation._id, conversation };
     }
+    async getAConversationById(conversationId) {
+        return this.chatService.getAConversationById(conversationId);
+    }
     async updateConversation(updateConversationDto) {
         return this.chatService.updateConversation(updateConversationDto);
     }
@@ -38,6 +41,9 @@ let ChatController = class ChatController {
     async getAllConversations(userId) {
         return this.chatService.getAllConversations(userId);
     }
+    async getAConversation(assistantId) {
+        return this.chatService.getAConversationByAssistantId(assistantId);
+    }
 };
 exports.ChatController = ChatController;
 __decorate([
@@ -48,6 +54,14 @@ __decorate([
     __metadata("design:paramtypes", [create_conversation_dto_1.CreateConversationDto]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "createConversation", null);
+__decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, common_1.Get)(':conversationId'),
+    __param(0, (0, common_1.Param)('conversationId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ChatController.prototype, "getAConversationById", null);
 __decorate([
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Put)(':conversationId'),
@@ -81,6 +95,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "getAllConversations", null);
+__decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, common_1.Get)('assistant/:assistantId'),
+    __param(0, (0, common_1.Param)('assistantId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ChatController.prototype, "getAConversation", null);
 exports.ChatController = ChatController = __decorate([
     (0, common_1.Controller)('chat'),
     __metadata("design:paramtypes", [chat_service_1.ChatService])

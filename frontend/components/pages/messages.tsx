@@ -11,14 +11,16 @@ import { getRandomGreeting } from '@/lib/utils';
 import { HeaderMenu } from '../chat/header-menu';
 import Login from './login';
 import ChatAssistantBuilder from './chat-assistant-builder';
+import { ChatUi } from './chat-ui';
 
 export const Messages: React.FC = () => {
+    const tempconv = {id: '', messages: [], lastUsed: new Date, assistant: '', assistantName: ''}
     const [userId, setUserId] = useState<string>('');
     const [token, setToken] = useState<string>('');
     const [conversations, setConversations] = useState<Conversation[]>([]);
-    const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
+    const [currentConversation, setCurrentConversation] = useState<Conversation>(tempconv);
     const [searchTerm, setSearchTerm] = useState('');
-    const [currentView, setCurrentView] = useState<'messages' | 'feedback' | 'contacts' | 'assistantBuilder'>('messages');
+    const [currentView, setCurrentView] = useState<'messages' | 'feedback' | 'contacts' | 'assistantBuilder' | 'chat'>('messages');
 
     // Fetch userId and token on load
     useEffect(() => {
@@ -31,7 +33,7 @@ export const Messages: React.FC = () => {
     
     useEffect(() => {
       if (userId && token && currentView === 'messages') {
-        console.log("Fetching conversations for userId:", userId);
+        console.log("Fetching messages for userId:", userId);
   
         axios
           .get(`http://localhost:4000/chat/user/${userId}`, {
@@ -55,9 +57,8 @@ export const Messages: React.FC = () => {
       setConversations([...conversations, newConversation]);
     };
 
-    const handleCreateNewConversation = async () => {
+  const handleCreateNewConversation = async () => {
     const greeting = getRandomGreeting();
-    const title = `New Conversation ${conversations.length + 1}`;
     const message: Message = { role: 'user', content: greeting };
 
     if (!token || !userId) {
@@ -68,7 +69,7 @@ export const Messages: React.FC = () => {
     try {
       const response = await axios.post(
         'http://localhost:4000/chat/create',
-        { userId, title, messages: message },
+        { userId, messages: message },
         {
           withCredentials: true,
           headers: {
@@ -81,7 +82,6 @@ export const Messages: React.FC = () => {
 
       const newConversation: Conversation = {
         id: conversationData._id,
-        title: title,
         messages: [message],
         lastUsed: new Date(),
         assistant: conversationData.assistant,
@@ -98,9 +98,26 @@ export const Messages: React.FC = () => {
     setConversations(conversations.filter((conv) => conv.id !== id));
   };
 
-  const handleSelectConversation = (conversation: Conversation) => {
-    setCurrentConversation(conversation);
+  const handleSelectConversation = async (conversation: Conversation) => {
+    try {
+      // Check if a conversation already exists with this assistant
+      const response = await axios.get(
+        `http://localhost:4000/chat/${userId}/${conversation.assistant}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    setCurrentConversation(response.data);
+  } catch (error) {
+    console.error('Error fetching conversation:', error);
+  }
   };
+  const goBackToMessages = () => {
+     setCurrentView('messages')
+};
+
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -116,22 +133,28 @@ export const Messages: React.FC = () => {
       </div>
   
   
-      {/* Conversation List or Contacts/Feedback based on currentView */}
       <div className="p-4 space-y-4">
-        {currentView === 'messages' && (
-          <ConversationList
-            userId={userId}
-            token={token}
-            conversations={conversations}
-            onSelectConversation={handleSelectConversation}
-            onDeleteConversation={handleDeleteConversation}
-            onCreateNewConversation={handleCreateNewConversation}
-          />
-        )}
-        {currentView === 'contacts' && <Contacts setCurrentView={setCurrentView} />}
-        {currentView === 'feedback' && <Feedback />}
-        {currentView === 'assistantBuilder' && <ChatAssistantBuilder />}
-      </div>
-    </div>
-  );
+                {/* Render ChatUi if a conversation is selected, otherwise show the ConversationList */}
+                {currentConversation ? (
+                    <ChatUi currentConversation={currentConversation} goBackToMessages={goBackToMessages} />
+                ) : (
+                    currentView === 'messages' && (
+                        <ConversationList
+                            userId={userId}
+                            token={token}
+                            conversations={conversations}
+                            onSelectConversation={handleSelectConversation}
+                            onDeleteConversation={(id) => setConversations(conversations.filter((conv) => conv.id !== id))}
+                            onCreateNewConversation={() => {/* handle create new conversation */}}
+                        />
+                    )
+                )}
+
+                {currentView === 'contacts' && <Contacts setCurrentView={setCurrentView} setConversation={setCurrentConversation}/>}
+                {currentView === 'feedback' && <Feedback />}
+                {currentView === 'assistantBuilder' && <ChatAssistantBuilder />}
+                {currentView === 'chat' && <ChatUi currentConversation={currentConversation} goBackToMessages={goBackToMessages}/>}
+            </div>
+        </div>
+    );
   }

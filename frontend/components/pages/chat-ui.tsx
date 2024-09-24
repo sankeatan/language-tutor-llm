@@ -1,238 +1,111 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { MessageList } from '../chat/message-list';
 import { InputArea } from '../chat/input-area';
-import { NewConversationScreen } from '../chat/new-conversation-screen';
-import axios from 'axios';
-import { getUserIdFromToken, getTokenFromCookies, getRandomGreeting } from '@/lib/utils';
-import { Conversation, Message } from '@/types/types'
-import { GrammarLessons } from './grammar-lessons';
-import Contacts from './contacts';
-import { PronunciationLessons } from './pronunciation-lessons';
-import Feedback from './feedback';
-import Login  from '@/components/pages/login'
-import ChatAssistantBuilder from './chat-assistant-builder';
-import { ArrowLeftIcon } from 'lucide-react';
 import { Button } from '../ui/button';
+import { ArrowLeftIcon } from 'lucide-react';
+import { Conversation, Message } from '@/types/types';
+import axios from 'axios';
+import { getTokenFromCookies, getUserIdFromToken } from '@/lib/utils';
 
-export function ChatUi() {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
+interface ChatUiProps {
+  currentConversation: Conversation;
+  goBackToMessages: () => void;
+}
+
+export const ChatUi: React.FC<ChatUiProps> = ({ currentConversation, goBackToMessages }) => {
   const [input, setInput] = useState('');
-  const [currentView, setCurrentView] = useState<'chat' | 'grammar' | 'pronunciation' | 'feedback' | 'contacts' | 'assistantBuilder'>('chat')
-  const [userId, setUserId] = useState<string>('');
-  const [token, setToken] = useState<string>('');
+  const [conversation, setConversation] = useState<Conversation | null>(currentConversation);
 
-  useEffect(() => {
-    const fetchedUserId = getUserIdFromToken();
-    const fetchedToken = getTokenFromCookies();
-
-    setUserId(fetchedUserId);
-    setToken(fetchedToken);
-  }, []);
-
-  if (!userId) {
-    return <Login setUserId={setUserId} />;
-  }
-
-  // Function to handle sending the message
+  // Handle sending the message
   const handleSendMessage = async () => {
-    console.log("Send button clicked"); // Check if function is triggered
-    if (!currentConversation) {
-        console.error('No active conversation')
-        return;
-    }
-
-    const token = getTokenFromCookies(); 
-    if (!token) {
-        console.error('No token found!');
-        return;
-    }
-    
-    const userId = getUserIdFromToken();  
-    if (!userId) {
-      console.error('Unable to retrieve userId or token');
+    if (!currentConversation || !currentConversation.id || currentConversation.id.length !== 24) {
+      console.error('Invalid conversation ID');
       return;
     }
 
-    console.log("User ID: ", userId); // Log userId
-    console.log("Token: ", token) //Log token
+    const token = getTokenFromCookies();
+    const userId = getUserIdFromToken();
 
-    if (input.trim() && currentConversation) {
-        console.log("Sending message to existing conversation:", currentConversation.id); // Log message and conversationId
-      
-        const newMessage: Message = { role: 'user', content: input };
+    if (!token || !userId) {
+      console.error('Token or userId is missing!');
+      return;
+    }
 
-      // Update current conversation with user message
+    if (input.trim()) {
+      // Create a new message object for the user
+      const newMessage: Message = { role: 'user', content: input };
+
+      // Update conversation locally with the user's message
       let updatedConversation: Conversation = {
         ...currentConversation,
         messages: [...currentConversation.messages, newMessage],
         lastUsed: new Date(),
       };
 
-      // Clear input field
-      setInput('');
-      setCurrentConversation(updatedConversation);
-      setConversations(
-        conversations.map((conv) =>
-          conv.id === currentConversation.id ? updatedConversation : conv
-        )
-      );
+      setConversation(updatedConversation);
 
-      // Send the message to the backend
+      setInput(''); // Clear input field
+
+      // Send the message to the backend and get GPT-4's response
       try {
         const response = await axios.post(
           `http://localhost:4000/chat/${currentConversation.id}`,
+          { message: input },
           {
-            message: input,
-          },
-          {
-            withCredentials: true, // Ensure that cookies (with JWT) are sent
-            headers: {
-                Authorization: `Bearer ${token}`,  // Attach the token in the Authorization header
-              },
+            withCredentials: true, // Ensure cookies are sent
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
-        console.log(response)
 
+        // Create an assistant message from the response
         const aiMessage: Message = {
-            role: 'ai',
-            content: response.data
+          role: 'ai',
+          content: response.data,
         };
-        console.log(aiMessage)
-        if (!aiMessage) {
-            console.error("Invalid conversation data:", aiMessage);
-            return;
-          }
 
+        // Update conversation with assistant's response
         updatedConversation = {
           ...updatedConversation,
-          messages: [...updatedConversation.messages, aiMessage],
+          messages: [...updatedConversation.messages, newMessage],
           lastUsed: new Date(),
         };
 
-        setCurrentConversation(updatedConversation);
-        setConversations(
-          conversations.map((conv) =>
-            conv.id === currentConversation.id ? updatedConversation : conv
-          )
-        );
+        setConversation(updatedConversation);
       } catch (error) {
-        console.error('Error updating conversation:', error);
+        console.error('Error sending message to GPT-4:', error);
       }
-    } 
-    // Clear input field after sending the message
-    setInput('');
-  };
-
-  const handleNewConversation = async () => {
-    console.log("New conversation started")
-    const token = getTokenFromCookies();
-    console.log("token: ", token)
-    const userId = getUserIdFromToken();
-    console.log("userId: ", userId)
-    const greeting = getRandomGreeting();
-    console.log("greeting: ", greeting)
-    const title = `New Conversation ${conversations.length + 1}`
-
-    // Prepare a new conversation locally (with a temporary ID)
-    const newTempConversation: Conversation = {
-        id: (conversations.length + 1).toString(),
-        title: title,
-        messages: [{ role: 'user', content: greeting }], // Greeting as the first message
-        lastUsed: new Date(),
-        assistant: '',
-        assistantName: ''
-    };
-
-    // Set the new conversation in the state
-    setCurrentConversation(newTempConversation);
-    setConversations([...conversations, newTempConversation]);
-
-    try {
-        const response = await axios.post('http://localhost:4000/chat/create', {
-            userId,
-            title,
-            messages: [{ role: 'user', content: greeting }]
-        }, {
-            withCredentials: true, // Ensure that cookies (with JWT) are sent
-            headers: {
-                Authorization: `Bearer ${token}`,  // Attach the token in the Authorization header
-            }
-        });
-        console.log(response)
-
-        const conversationData = response.data.conversation;
-        console.log(conversationData)
-
-      // Update the conversation with the real backend ID
-        const updatedConversation: Conversation = {
-            id: conversationData._id, // Use MongoDB _id from backend
-            title: title,
-            messages: conversationData.messages, // Retain the greeting message
-            lastUsed: new Date(),
-            assistant: conversationData.assisstant,
-            assistantName: conversationData.assistantName
-        };
-
-        // Clear input field
-        setInput('');
-        setCurrentConversation(updatedConversation);
-        setConversations(
-            conversations.map((conv) =>
-            conv.id === newTempConversation.id ? updatedConversation : conv
-            )
-        );
-
-    } catch (error) {
-      console.error('Error creating conversation:', error);
     }
-  };
-
-  const goBackToMessages = () => {
-    setCurrentConversation(null);
   };
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-        {/* Back Button */}
-        {currentConversation && (
-          <div className="p-4">
-            <Button variant="ghost" size="icon" onClick={goBackToMessages}>
-              <ArrowLeftIcon className="h-6 w-6" />
-            </Button>
-          </div>
-      )}
-        
-        <div className="flex flex-">
-        {/* Main content area */}
-      <div className="flex-grow">
-        {currentView === 'chat' && (
-          currentConversation ? (
-            <>
-              <MessageList messages={currentConversation.messages} />
-              <InputArea
-                input={input}
-                setInput={setInput}
-                onSendMessage={handleSendMessage}
-                handleMicrophoneStart={() => {}}
-                handleMicrophoneEnd={() => {}}
-                handlePaperclipClick={() => {}}
-              />
-            </>
-          ) : (
-            <NewConversationScreen startNewConversation={handleNewConversation} />
-          )
-        )}
+      {/* Back Button */}
+      <div className="p-4">
+        <Button variant="ghost" size="icon" onClick={goBackToMessages}>
+          <ArrowLeftIcon className="h-6 w-6" />
+        </Button>
+      </div>
 
-        {currentView === 'grammar' && <GrammarLessons />}
-        {currentView === 'pronunciation' && <PronunciationLessons />}
-        {currentView === 'feedback' && <Feedback />}
-        {currentView === 'contacts' && <Contacts setCurrentView={setCurrentView}/>}
-        {currentView === 'assistantBuilder' && <ChatAssistantBuilder />}
+      {/* Message List and Input Area */}
+      <div className="flex-grow">
+        {currentConversation ? (
+          <>
+            <MessageList messages={currentConversation.messages} />
+            <InputArea
+              input={input}
+              setInput={setInput}
+              onSendMessage={handleSendMessage}
+              handleMicrophoneStart={() => {}}
+              handleMicrophoneEnd={() => {}}
+              handlePaperclipClick={() => {}}
+            />
+          </>
+        ) : (
+          <div>No conversation selected</div>
+        )}
       </div>
     </div>
-  </div>
-);
-}
+  );
+};

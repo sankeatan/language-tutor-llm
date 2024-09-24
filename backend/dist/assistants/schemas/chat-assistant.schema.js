@@ -11,9 +11,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatAssistantSchema = exports.ChatAssistant = void 0;
 const mongoose_1 = require("@nestjs/mongoose");
-let ChatAssistant = class ChatAssistant {
+const mongoose_2 = require("mongoose");
+let ChatAssistant = class ChatAssistant extends mongoose_2.Document {
 };
 exports.ChatAssistant = ChatAssistant;
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], ChatAssistant.prototype, "assistantId", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
@@ -21,19 +26,19 @@ __decorate([
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
-], ChatAssistant.prototype, "personality", void 0);
-__decorate([
-    (0, mongoose_1.Prop)({ required: true }),
-    __metadata("design:type", String)
 ], ChatAssistant.prototype, "userId", void 0);
-__decorate([
-    (0, mongoose_1.Prop)({ required: true }),
-    __metadata("design:type", Array)
-], ChatAssistant.prototype, "interests", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ required: false }),
     __metadata("design:type", String)
 ], ChatAssistant.prototype, "instructions", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], ChatAssistant.prototype, "personality", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", Array)
+], ChatAssistant.prototype, "interests", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)

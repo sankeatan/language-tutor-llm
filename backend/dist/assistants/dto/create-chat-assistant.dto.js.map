@@ -1,1 +1,1 @@
-{"version":3,"file":"create-chat-assistant.dto.js","sourceRoot":"","sources":["../../../src/assistants/dto/create-chat-assistant.dto.ts"],"names":[],"mappings":";;;AAAA,MAAa,sBAAsB;CAMhC;AANH,wDAMG"}
+{"version":3,"file":"create-chat-assistant.dto.js","sourceRoot":"","sources":["../../../src/assistants/dto/create-chat-assistant.dto.ts"],"names":[],"mappings":";;;AAAA,MAAa,sBAAsB;CAWlC;AAXD,wDAWC"}

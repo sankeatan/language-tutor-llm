@@ -8,8 +8,10 @@ export declare class ChatController {
         conversationId: unknown;
         conversation: import("./schemas/conversation.schema").Conversation;
     }>;
+    getAConversationById(conversationId: string): Promise<import("./schemas/conversation.schema").Conversation>;
     updateConversation(updateConversationDto: UpdateConversationDto): Promise<import("./schemas/conversation.schema").Conversation>;
     getChatResponse(conversationId: string, message: string): Promise<string>;
     deleteConversation(conversationId: string): Promise<import("./schemas/conversation.schema").Conversation>;
     getAllConversations(userId: string): Promise<import("./schemas/conversation.schema").Conversation[]>;
+    getAConversation(assistantId: string): Promise<import("./schemas/conversation.schema").Conversation>;
 }

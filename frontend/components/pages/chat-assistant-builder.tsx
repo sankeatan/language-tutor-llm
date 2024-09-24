@@ -10,6 +10,9 @@ export const ChatAssistantBuilder: React.FC = () => {
     const [interests, setInterests] = useState<string[]>([]);
     const [assistantName, setAssistantName] = useState('');
     const [assistantBackground, setAssistantBackground] = useState('');
+    const [gender, setGender] = useState('');
+    const [customGender, setCustomGender] = useState('');
+    const [age, setage] = useState('');
     const [loading, setLoading] = useState(false);
     const token = getTokenFromCookies()
     const userId = getUserIdFromToken()
@@ -34,13 +37,29 @@ export const ChatAssistantBuilder: React.FC = () => {
         'Gardening',
       ];
 
+    const genderOptions = [
+        { label: 'Man', value: 'Man' },
+        { label: 'Woman', value: 'Woman' },
+        { label: 'Non-binary', value: 'Non-binary' },
+        { label: 'Let Me Type...', value: 'Custom' },
+    ];
+
+    const ageOptions = Array.from({ length: 80 }, (_, i) => ({
+        label: `${i + 21} years old`,
+        value: `${i + 21}`,
+    }));
+
+
     const handleGenerateAssistant = async () => {
         setLoading(true);
+        const finalGender = gender === 'Custom' ? customGender : gender;
         try {
             const response = await axios.post('http://localhost:4000/assistant/generate', {
                 personality,
                 interests,
-                userId
+                userId,
+                gender: finalGender,
+                age,
             }, {
                 withCredentials: true,
                 headers: {
@@ -69,10 +88,10 @@ export const ChatAssistantBuilder: React.FC = () => {
 
     return (
         <div className="assistant-builder-container">
-            <h1>Create Your Assistant</h1>
+            <h1>Generate a Language Partner</h1>
 
             {/* Step 1: Choose personality */}
-            <label>Select Assistant Personality:</label>
+            <label>Select Personality Trait:</label>
             <Select
                 options={personalities} // Array of options
                 value={personality} // Current selected value
@@ -80,7 +99,7 @@ export const ChatAssistantBuilder: React.FC = () => {
             />
 
             {/* Step 2: Choose interests */}
-            <label>Select Assistant Interests:</label>
+            <label>Select Interests:</label>
             {availableInterests.map((interest) => (
                 <Checkbox
                 key={interest}
@@ -89,6 +108,31 @@ export const ChatAssistantBuilder: React.FC = () => {
                 onChange={(isChecked) => handleInterestChange(interest, isChecked)} // Handle change
                 />
             ))}
+
+            {/* Step 3: Select gender */}
+            <label>Select Gender:</label>
+            <Select
+                options={genderOptions}
+                value={gender}
+                onChange={setGender}
+            />
+            {gender === 'Custom' && (
+                <input
+                    type="text"
+                    placeholder="Enter custom gender"
+                    maxLength={30}
+                    value={customGender}
+                    onChange={(e) => setCustomGender(e.target.value)}
+                />
+            )}
+            
+            {/* Step 4: Select age range */}
+            <label>Select Age Range:</label>
+            <Select
+                options={ageOptions}
+                value={age}
+                onChange={setage}
+            />
 
             {/* Generate Assistant Button */}
             <Button onClick={handleGenerateAssistant} disabled={loading || !personality}>

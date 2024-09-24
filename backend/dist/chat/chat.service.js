@@ -48,6 +48,7 @@ let ChatService = class ChatService {
                 messages: [{ role: 'user', content: message }],
             });
             const reply = response.choices[0].message?.content || 'No response from GPT-4';
+            console.log(reply);
             if (conversationId) {
                 await this.updateConversation({
                     conversationId: conversationId,
@@ -84,6 +85,16 @@ let ChatService = class ChatService {
         const conversations = await this.conversationModel.find({ userId }).select('assistant messages lastUsed assistantName').exec();
         console.log("Found conversations:", conversations);
         return conversations;
+    }
+    async getAConversationByAssistantId(assistant) {
+        console.log(`Fetching conversations for ${assistant}`);
+        const conversation = await this.conversationModel.findOne({ assistant }).select('messages');
+        return conversation;
+    }
+    async getAConversationById(conversationId) {
+        console.log(`Fetching conversations for ${conversationId}`);
+        const conversation = await this.conversationModel.findById({ conversationId }).select('messages');
+        return conversation;
     }
 };
 exports.ChatService = ChatService;

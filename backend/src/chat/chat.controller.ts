@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Req, Body, Param, Delete, Get, Put } from '@nestjs/common';
+import { Controller, Post, UseGuards, Req, Body, Param, Delete, Get, Put, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ChatService } from './chat.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
@@ -15,13 +15,18 @@ export class ChatController {
     const conversation = await this.chatService.createConversation(createConversationDto);
     return { conversationId: conversation._id, conversation };  // Return conversation with MongoDB _id
   }
+
+  @UseGuards(AuthGuard('jwt'))
+  //Update a conversation from conversationId
+  @Get(':conversationId')
+  async getAConversationById(@Param('conversationId') conversationId: string) {
+    return this.chatService.getAConversationById(conversationId);
+  }
   
   @UseGuards(AuthGuard('jwt'))
   //Update conversation
   @Put(':conversationId')
-  async updateConversation(
-    @Body() updateConversationDto: UpdateConversationDto,
-  ) {
+  async updateConversation(@Body() updateConversationDto: UpdateConversationDto) {
     return this.chatService.updateConversation(updateConversationDto);
   }
 
@@ -47,5 +52,14 @@ export class ChatController {
   @Get('user/:userId')
   async getAllConversations(@Param('userId') userId: string) {
     return this.chatService.getAllConversations(userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  // Get a conversation
+  @Get('assistant/:assistantId')
+  async getAConversation(
+    @Param('assistantId') assistantId: string
+  ) {
+    return this.chatService.getAConversationByAssistantId(assistantId);
   }
 }

@@ -23,17 +23,15 @@
 /// <reference types="mongoose/types/virtuals" />
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose/types/inferrawdoctype" />
-import { ChatService } from '../chat/chat.service';
 import { Model } from 'mongoose';
-import { ChatAssistant } from 'src/assistants/schemas/chat-assistant.schema';
+import { ChatAssistant } from './schemas/chat-assistant.schema';
+import { CreateChatAssistantDto } from './dto/create-chat-assistant.dto';
+import { ChatService } from '../chat/chat.service';
 export declare class AssistantService {
+    private chatAssistantModel;
     private readonly chatService;
-    private readonly chatAssistantModel;
-    constructor(chatService: ChatService, chatAssistantModel: Model<ChatAssistant>);
-    generateChatAssistant(createChatAssistantDto: {
-        personality: string;
-        interests: string[];
-        userId: string;
-    }): Promise<void>;
+    private openai;
+    constructor(chatAssistantModel: Model<ChatAssistant>, chatService: ChatService);
+    generateChatAssistant(createChatAssistantDto: CreateChatAssistantDto): Promise<void>;
     getAllAssistantsForUser(userId: string): Promise<ChatAssistant[]>;
 }

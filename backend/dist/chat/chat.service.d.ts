@@ -36,4 +36,6 @@ export declare class ChatService {
     updateConversation(dto: UpdateConversationDto): Promise<Conversation>;
     deleteConversation(conversationId: string): Promise<Conversation>;
     getAllConversations(userId: string): Promise<Conversation[]>;
+    getAConversationByAssistantId(assistant: string): Promise<Conversation>;
+    getAConversationById(conversationId: string): Promise<Conversation>;
 }

@@ -111,7 +111,6 @@ export const ConversationList: React.FC<ConversationListProps> = ({
             <div className="flex-1 space-y-1">
               {/* Top row: Name and time */}
               <div className="flex justify-between">
-                <div className="font-bold">{conv.title}</div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   {formatTime(conv.lastUsed)}
                 </div>

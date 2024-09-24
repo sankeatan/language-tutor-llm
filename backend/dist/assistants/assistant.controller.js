@@ -16,6 +16,7 @@ exports.AssistantController = void 0;
 const common_1 = require("@nestjs/common");
 const assistant_service_1 = require("./assistant.service");
 const passport_1 = require("@nestjs/passport");
+const create_chat_assistant_dto_1 = require("./dto/create-chat-assistant.dto");
 let AssistantController = class AssistantController {
     constructor(assistantService) {
         this.assistantService = assistantService;
@@ -23,7 +24,7 @@ let AssistantController = class AssistantController {
     async getAllAssistants(userId) {
         return this.assistantService.getAllAssistantsForUser(userId);
     }
-    async generateassistant(createChatAssistantDto) {
+    async generateAssistant(createChatAssistantDto) {
         return this.assistantService.generateChatAssistant(createChatAssistantDto);
     }
 };
@@ -41,9 +42,9 @@ __decorate([
     (0, common_1.Post)('generate'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [create_chat_assistant_dto_1.CreateChatAssistantDto]),
     __metadata("design:returntype", Promise)
-], AssistantController.prototype, "generateassistant", null);
+], AssistantController.prototype, "generateAssistant", null);
 exports.AssistantController = AssistantController = __decorate([
     (0, common_1.Controller)('assistant'),
     __metadata("design:paramtypes", [assistant_service_1.AssistantService])
