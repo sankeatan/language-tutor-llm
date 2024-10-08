@@ -1,65 +1,62 @@
-import { Controller, Post, UseGuards, Req, Body, Param, Delete, Get, Put, Query } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Controller, Post, Get, Delete, Param, Body } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { CreateConversationDto } from './dto/create-conversation.dto';
-import { UpdateConversationDto } from './dto/update-conversation.dto';
+import { OpenAIService } from 'src/shared/services/openai.service';
+import { Thread } from './schemas/thread.schema';
+import { Message } from './schemas/message.schema';
 
 @Controller('chat')
 export class ChatController {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly openAIService: OpenAIService) {}
 
-  @UseGuards(AuthGuard('jwt'))  // Protect this route
-  // Create a new conversation
-  @Post('create')
-  async createConversation(@Body() createConversationDto: CreateConversationDto) {
-    const conversation = await this.chatService.createConversation(createConversationDto);
-    return { conversationId: conversation._id, conversation };  // Return conversation with MongoDB _id
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  //Update a conversation from conversationId
-  @Get(':conversationId')
-  async getAConversationById(@Param('conversationId') conversationId: string) {
-    return this.chatService.getAConversationById(conversationId);
-  }
-  
-  @UseGuards(AuthGuard('jwt'))
-  //Update conversation
-  @Put(':conversationId')
-  async updateConversation(@Body() updateConversationDto: UpdateConversationDto) {
-    return this.chatService.updateConversation(updateConversationDto);
+  // Start a new chat thread
+  @Post('start')
+  async startThread(
+    @Body('userId') userId: string,
+    @Body('metadata') metadata: any,
+  ): Promise<Thread> {
+    const thread: Thread = { userId, metadata, createdAt: new Date() };
+    return this.chatService.createThread(thread);
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  // Get GPT-4 response and update the conversation
-  @Post(':id')
-  async getChatResponse(
-    @Param('id') conversationId: string,
-    @Body('message') message: string,
-  ) {
-    return this.chatService.getGPT4Response(conversationId, message);
+  // Send a message in an existing thread
+  @Post(':threadId/message')
+  async sendMessage(
+    @Param('threadId') threadId: string,
+    @Body('assistantId') assistantId: string,
+    @Body('content') content: string,
+  ): Promise<Message> {
+    return this.chatService.handleUserMessage(threadId, assistantId, content);
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  // Delete a conversation
-  @Delete(':id')
-  async deleteConversation(@Param('id') conversationId: string) {
-    return this.chatService.deleteConversation(conversationId);
+  // Retrieve all messages in a thread
+  @Get(':threadId/messages')
+  async getMessages(@Param('threadId') threadId: string): Promise<Message[]> {
+    return this.chatService.getMessages(threadId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  // Get all conversations for a user
-  @Get('user/:userId')
-  async getAllConversations(@Param('userId') userId: string) {
-    return this.chatService.getAllConversations(userId);
+  // Retrieve the latest message in a thread
+  @Get(':threadId/latest')
+  async getLatestMessage(@Param('threadId') threadId: string): Promise<Message> {
+    return this.openAIService.getLatestMessage(threadId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  // Get a conversation
-  @Get('assistant/:assistantId')
-  async getAConversation(
-    @Param('assistantId') assistantId: string
-  ) {
-    return this.chatService.getAConversationByAssistantId(assistantId);
+  // Delete a thread and all its associated messages
+  @Delete(':threadId')
+  async deleteThread(@Param('threadId') threadId: string): Promise<{ message: string }> {
+    await this.chatService.deleteThread(threadId);
+    return { message: `Thread ${threadId} deleted successfully` };
   }
+
+  // Delete a specific message in a thread
+  @Delete(':threadId/message/:messageId')
+  async deleteMessage(
+    @Param('threadId') threadId: string,
+    @Param('messageId') messageId: string,
+  ): Promise<{ message: string }> {
+    await this.chatService.deleteMessage(threadId, messageId);
+    return { message: `Message ${messageId} from thread ${threadId} deleted successfully` };
+  }
+
 }

@@ -38,14 +38,43 @@ let AuthService = class AuthService {
         if (!isPasswordValid) {
             throw new Error('Invalid credentials');
         }
-        const payload = { userId: user._id, email: user.email };
-        const token = this.jwtService.sign(payload, {
+        const accessTokenPayload = { userId: user._id, email: user.email };
+        const accessToken = this.jwtService.sign(accessTokenPayload, {
             secret: process.env.JWT_SECRET,
+            expiresIn: '15m'
         });
-        return { token, userId: user._id };
+        const refreshTokenPayload = { userId: user._id };
+        const refreshToken = this.jwtService.sign(refreshTokenPayload, {
+            secret: process.env.JWT_REFRESH_SECRET,
+            expiresIn: '7d',
+        });
+        return { accessToken, refreshToken, userId: user._id };
     }
     async validateUser(userId) {
         return this.userModel.findById(userId);
+    }
+    async refreshToken(refreshToken) {
+        try {
+            const payload = this.jwtService.verify(refreshToken, { secret: process.env.JWT_REFRESH_SECRET });
+            console.log('Verifying refresh token...');
+            console.log('Refresh token payload:', payload);
+            const user = await this.userModel.findById(payload.sub);
+            if (!user) {
+                console.log('User not found during token refresh');
+                throw new common_1.UnauthorizedException('User not found');
+            }
+            const newAccessToken = this.jwtService.sign({ sub: user.id }, { secret: process.env.JWT_SECRET, expiresIn: '15m' });
+            const newRefreshToken = this.jwtService.sign({ sub: user.id }, { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' });
+            console.log('New tokens generated:', { newAccessToken, newRefreshToken });
+            return {
+                accessToken: newAccessToken,
+                refreshToken: newRefreshToken,
+            };
+        }
+        catch (error) {
+            console.error('Error during token refresh:', error.message);
+            throw new common_1.UnauthorizedException('Invalid refresh token');
+        }
     }
 };
 exports.AuthService = AuthService;

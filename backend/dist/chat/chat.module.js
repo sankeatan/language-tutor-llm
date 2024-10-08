@@ -11,17 +11,23 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const chat_service_1 = require("./chat.service");
 const chat_controller_1 = require("./chat.controller");
-const conversation_schema_1 = require("./schemas/conversation.schema");
+const thread_schema_1 = require("./schemas/thread.schema");
+const message_schema_1 = require("./schemas/message.schema");
+const openai_service_1 = require("../shared/services/openai.service");
 let ChatModule = class ChatModule {
 };
 exports.ChatModule = ChatModule;
 exports.ChatModule = ChatModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            mongoose_1.MongooseModule.forFeature([{ name: conversation_schema_1.Conversation.name, schema: conversation_schema_1.ConversationSchema }])
+            mongoose_1.MongooseModule.forFeature([
+                { name: thread_schema_1.Thread.name, schema: thread_schema_1.ThreadSchema },
+                { name: message_schema_1.Message.name, schema: message_schema_1.MessageSchema },
+            ]),
         ],
-        providers: [chat_service_1.ChatService],
         controllers: [chat_controller_1.ChatController],
+        providers: [chat_service_1.ChatService, openai_service_1.OpenAIService],
+        exports: [chat_service_1.ChatService],
     })
 ], ChatModule);
 //# sourceMappingURL=chat.module.js.map

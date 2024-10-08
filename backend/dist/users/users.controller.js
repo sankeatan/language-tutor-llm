@@ -16,7 +16,6 @@ exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
 const users_service_1 = require("./users.service");
 const create_user_dto_1 = require("./dto/create-user.dto");
-const update_conversation_dto_1 = require("../chat/dto/update-conversation.dto");
 let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
@@ -27,9 +26,6 @@ let UsersController = class UsersController {
     }
     async getUserById(id) {
         return await this.usersService.findUserById(id);
-    }
-    async updateConversation(id, updateConversationDto) {
-        return await this.usersService.updateConversation(id, updateConversationDto);
     }
 };
 exports.UsersController = UsersController;
@@ -47,14 +43,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getUserById", null);
-__decorate([
-    (0, common_1.Patch)(':id/conversation'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_conversation_dto_1.UpdateConversationDto]),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "updateConversation", null);
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [users_service_1.UsersService])

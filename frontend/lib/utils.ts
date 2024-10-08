@@ -14,7 +14,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const getUserIdFromToken = (): string  => {
+export const getUserIdFromToken = (): string | null  => {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return null;
+  }
   const token = document.cookie
     .split('; ')
     .find((row) => row.startsWith('token='))
@@ -48,11 +51,11 @@ export function getRandomGreeting() {
   return greetings[Math.floor(Math.random() * greetings.length)];
 }
 
-  export function getTokenFromCookies() {
+  export function getTokenFromCookies(tokenName: 'token' | 'refresh_token'): string {
     if (typeof document !== 'undefined') {  // Check if we are in the browser environment
       const cookie = document.cookie
         .split('; ')
-        .find((row) => row.startsWith('token='));
+        .find((row) => row.startsWith(`${tokenName}=`));
   
       return cookie ? cookie.split('=')[1] : '';
     }
@@ -76,3 +79,15 @@ export function getRandomGreeting() {
     // If there's no last name, return just the first initial
     return `${firstName.charAt(0).toUpperCase()}${lastName.charAt(0).toUpperCase()}`;
   }
+
+  // Helper function to determine if the request is for a static asset
+export function isStaticAsset (pathname: string) {
+  return (
+    pathname.startsWith('/_next') || // Next.js assets
+    pathname.endsWith('.js') ||
+    pathname.endsWith('.css') ||
+    pathname.endsWith('.png') ||
+    pathname.endsWith('.jpg') ||
+    pathname.endsWith('.svg')
+  );
+};

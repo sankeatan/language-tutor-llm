@@ -1,5 +1,3 @@
-'use client'
-
 import { Button } from "@/components/ui/button"
 import { UserDropdownMenu } from './dropdown-menu'  // Assuming you already modularized the dropdown
 import { MessageCircleIcon, BarChartIcon, ContactIcon } from "lucide-react"

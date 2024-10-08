@@ -11,11 +11,8 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const assistant_service_1 = require("./assistant.service");
 const assistant_controller_1 = require("./assistant.controller");
-const chat_service_1 = require("../chat/chat.service");
-const conversation_schema_1 = require("../chat/schemas/conversation.schema");
-const chat_assistant_schema_1 = require("./schemas/chat-assistant.schema");
-const contacts_controller_1 = require("./contacts/contacts.controller");
-const contacts_service_1 = require("./contacts/contacts.service");
+const chat_assistant_schema_1 = require("../assistants/schemas/chat-assistant.schema");
+const openai_service_1 = require("../shared/services/openai.service");
 let AssistantModule = class AssistantModule {
 };
 exports.AssistantModule = AssistantModule;
@@ -23,10 +20,10 @@ exports.AssistantModule = AssistantModule = __decorate([
     (0, common_1.Module)({
         imports: [
             mongoose_1.MongooseModule.forFeature([{ name: chat_assistant_schema_1.ChatAssistant.name, schema: chat_assistant_schema_1.ChatAssistantSchema }]),
-            mongoose_1.MongooseModule.forFeature([{ name: conversation_schema_1.Conversation.name, schema: conversation_schema_1.ConversationSchema }])
         ],
-        controllers: [assistant_controller_1.AssistantController, contacts_controller_1.ContactController],
-        providers: [assistant_service_1.AssistantService, chat_service_1.ChatService, contacts_service_1.ContactService],
+        controllers: [assistant_controller_1.AssistantController],
+        providers: [assistant_service_1.AssistantService, openai_service_1.OpenAIService],
+        exports: [assistant_service_1.AssistantService],
     })
 ], AssistantModule);
 //# sourceMappingURL=assistant.module.js.map

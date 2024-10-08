@@ -18,13 +18,17 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() body: { email: string, password: string }) {
-    const { token, userId } = await this.authService.login(body.email, body.password);
-    return { token, userId };  // Return JWT token and userId
+    const { accessToken, refreshToken, userId } = await this.authService.login(body.email, body.password);
+
+    console.log('Auth Controller Access Token:', accessToken);
+    console.log('Auth Controller Refresh Token:', refreshToken);
+
+    return { accessToken, refreshToken, userId };  // Return JWT token and userId
   }
 
   @Get('verify-token')
   verifyToken(@Req() req: Request) {
-    const token = req.cookies['token'];  // Get the token from cookies
+    const token = req.cookies?.['token'];  // Get the token from cookies
     if (!token) {
       throw new UnauthorizedException('No token provided');
     }
@@ -37,7 +41,19 @@ export class AuthController {
       throw new UnauthorizedException('Invalid token');
     }
   }
-  
+
+  @Post('refresh-token')
+  async refreshToken(@Body('refreshToken') refreshToken: string) {
+    console.log('Received refresh token for refresh:', refreshToken);
+    const tokens = await this.authService.refreshToken(refreshToken);
+    if (!tokens) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    console.log('Refreshed tokens:', tokens);
+    return tokens;
+  }
+
   @Post('logout')
   logout(@Res() res: Response) {
     // Clear the cookie

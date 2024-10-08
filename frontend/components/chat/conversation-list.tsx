@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '@/lib/axiosConfig';
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Conversation } from "@/types/types";
 import { TrashIcon, PlusIcon, EditIcon } from "lucide-react";
-import { formatTime, getInitials } from '@/lib/utils';
+import { formatTime, getInitials, getUserIdFromToken } from '@/lib/utils';
 
 interface ConversationListProps {
-    userId: string;
-    token: string;
     conversations: Conversation[];
     onSelectConversation: (conversation: Conversation) => void;
     onDeleteConversation: (id: string) => void;
@@ -19,13 +17,16 @@ export const ConversationList: React.FC<ConversationListProps> = ({
     onSelectConversation,
     onDeleteConversation,
     onCreateNewConversation,
-    userId,
-    token,
 }) => {
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const enableAuth = process.env.ENABLE_AUTH === 'true'
+    const userId = '66e8da98be24f83613de9809'
+    if (enableAuth){
+      const userId = getUserIdFromToken();
+    }
 
     // Fetch conversations when the component mounts
   useEffect(() => {
@@ -36,11 +37,8 @@ export const ConversationList: React.FC<ConversationListProps> = ({
       console.log(`Fetching conversations for userId: ${userId}`)
 
       try {
-        const response = await axios.get(`http://localhost:4000/chat/user/${userId}`, {
+        const response = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/chat/user/${userId}`, {
           withCredentials: true,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         });
         console.log("Chat history data: ", response)
         setConversations(response.data);
@@ -51,11 +49,8 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         setLoading(false);
       }
     };
-
-    if (userId && token) {
       fetchConversations(); // Only fetch conversations if userId and token are available
-    }
-  }, [userId, token]);
+  }, []);
 
   if (loading) {
     return <div>Loading conversations...</div>;

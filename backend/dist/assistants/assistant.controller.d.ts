@@ -1,8 +1,13 @@
 import { AssistantService } from './assistant.service';
-import { CreateChatAssistantDto } from './dto/create-chat-assistant.dto';
+import { ChatAssistant } from './schemas/chat-assistant.schema';
 export declare class AssistantController {
     private readonly assistantService;
     constructor(assistantService: AssistantService);
-    getAllAssistants(userId: string): Promise<import("./schemas/chat-assistant.schema").ChatAssistant[]>;
-    generateAssistant(createChatAssistantDto: CreateChatAssistantDto): Promise<void>;
+    createAssistant(userId: string, personalityTraits: string[], interests: string[], gender: string, age: number, language: string): Promise<ChatAssistant>;
+    getAssistant(assistantId: string): Promise<ChatAssistant>;
+    listAssistants(userId: string): Promise<ChatAssistant[]>;
+    updateAssistant(assistantId: string, personalityTraits: string[], interests: string[], gender: string, age: number, language: string): Promise<ChatAssistant>;
+    deleteAssistant(assistantId: string): Promise<{
+        message: string;
+    }>;
 }

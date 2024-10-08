@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from '../users/schemas/user.schema';
@@ -31,16 +31,54 @@ export class AuthService {
       throw new Error('Invalid credentials');
     }
 
-    const payload = { userId: user._id, email: user.email };
-    const token = this.jwtService.sign(payload, {
+    // Payload for access token (contains user-specific information)
+    const accessTokenPayload = { userId: user._id, email: user.email };
+
+    const accessToken = this.jwtService.sign(accessTokenPayload, {
         secret: process.env.JWT_SECRET,
+        expiresIn: '15m'
     });
 
-    return { token, userId: user._id };  // Return JWT and userId
+    const refreshTokenPayload = { userId: user._id };
+
+    const refreshToken = this.jwtService.sign(refreshTokenPayload, {
+        secret: process.env.JWT_REFRESH_SECRET,
+        expiresIn: '7d',  // Refresh token expires in 7 days
+      });
+
+    return { accessToken, refreshToken, userId: user._id };  // Return JWT and userId
   }
 
   // Validate a user based on JWT token
   async validateUser(userId: string) {
     return this.userModel.findById(userId);
+  }
+
+  async refreshToken(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken, { secret: process.env.JWT_REFRESH_SECRET });
+      console.log('Verifying refresh token...')
+      console.log('Refresh token payload:', payload); 
+
+      const user = await this.userModel.findById(payload.sub);
+      if (!user) {
+        console.log('User not found during token refresh');
+        throw new UnauthorizedException('User not found');
+      }
+
+      // Generate new access and refresh tokens
+      const newAccessToken = this.jwtService.sign({ sub: user.id }, { secret: process.env.JWT_SECRET, expiresIn: '15m' });
+      const newRefreshToken = this.jwtService.sign({ sub: user.id }, { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' });
+
+      console.log('New tokens generated:', { newAccessToken, newRefreshToken });
+
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      };
+    } catch (error) {
+        console.error('Error during token refresh:', error.message);
+      throw new UnauthorizedException('Invalid refresh token');
+    }
   }
 }

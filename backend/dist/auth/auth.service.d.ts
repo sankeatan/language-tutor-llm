@@ -34,10 +34,15 @@ export declare class AuthService {
         _id: import("mongoose").Types.ObjectId;
     }>>;
     login(email: string, password: string): Promise<{
-        token: string;
+        accessToken: string;
+        refreshToken: string;
         userId: import("mongoose").Types.ObjectId;
     }>;
     validateUser(userId: string): Promise<import("mongoose").Document<unknown, {}, User> & User & Required<{
         _id: import("mongoose").Types.ObjectId;
     }>>;
+    refreshToken(refreshToken: string): Promise<{
+        accessToken: string;
+        refreshToken: string;
+    }>;
 }

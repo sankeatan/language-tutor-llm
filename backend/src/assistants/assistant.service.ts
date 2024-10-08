@@ -1,109 +1,229 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { OpenAI } from 'openai'; // Import OpenAI client
-import { ChatAssistant } from './schemas/chat-assistant.schema';
-import { CreateChatAssistantDto } from './dto/create-chat-assistant.dto';
-import { CreateConversationDto } from '../chat/dto/create-conversation.dto';
-import { ChatService } from '../chat/chat.service';
-import { JsonWebTokenError } from '@nestjs/jwt';
+import { ChatAssistant, ChatAssistantDocument } from './schemas/chat-assistant.schema';
+import { OpenAIService } from 'src/shared/services/openai.service';
+import * as fs from 'fs'
+
 
 @Injectable()
 export class AssistantService {
-  private openai: OpenAI;
+  private readonly logger = new Logger(AssistantService.name);
 
-  constructor(
-    @InjectModel(ChatAssistant.name) private chatAssistantModel: Model<ChatAssistant>,
-    private readonly chatService: ChatService,
-  ) {
-    this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); // Initialize OpenAI client
-  }
+  constructor(@InjectModel(ChatAssistant.name)
+    private assistantModel: Model<ChatAssistantDocument>,
+    private readonly openAIService: OpenAIService) {}
 
-  async generateChatAssistant(createChatAssistantDto: CreateChatAssistantDto) {
-    const { personality, interests, userId, gender, age } = createChatAssistantDto;
+  // Create a new chatbot assistant
+  async createAssistant(userId: string, assistantData: Partial<ChatAssistant>): Promise<ChatAssistant> {
+    this.logger.log(`Creating assistant for user: ${userId}`);
 
-    let name = 'Generating...';
-    let background = 'Generating...';
-    let assistantId = 'Generating...'
 
-    const backgroundPrompt = `
-      Please help complete the profile of a contemporary spanish language speaker.
-      I would like you to generate a name, as well as history and background that are culturally appropriate for a spanish speaker.
-      I am going to give you a personality trait and list of interests and a gender that you are going to incorporate into the history and background.
-      If the value for any of these profile key's is "GPT Choice" then I'd like you to insert your own choice for that value.
+    // Auto-generate background history and relationships based on predefined logic
+    const name = await this.generateName(
+      assistantData.personalityTraits, 
+      assistantData.interests, 
+      assistantData.gender, 
+      assistantData.age, 
+      assistantData.language
+    )
+    const backgroundHistory = await this.generateBackground(
+      assistantData.personalityTraits, 
+      assistantData.interests, 
+      assistantData.gender, 
+      assistantData.age, 
+      assistantData.language,
+      name.toString());
+    const relationships = await this.generateRelationships(
+      assistantData.personalityTraits, 
+      assistantData.interests, 
+      assistantData.gender, 
+      assistantData.age, 
+      assistantData.language, 
+      backgroundHistory.toString());
+    const weeklySchedule = await this.generateWeeklySchedule(
+      assistantData.personalityTraits, 
+      assistantData.interests, 
+      assistantData.gender, 
+      assistantData.age, 
+      assistantData.language, 
+      backgroundHistory.toString(), 
+      relationships.toString());
 
-      Profile
-      Personality: ${personality}
-      Interests: ${interests.join(', ')}
-      Gender: ${gender}
-      Age Range: ${age}
-
-      When generating the name please take gender into account.
-
-      When writing the history please include birth year, birth place, current country, relatives, notable current and past friends, 
-      notable current and past jobs, and any other details that can help give the profile a detailed history. When generating the birth year 
-      take the age of the user into account. Subtract it from the current year of 2024. Give the response only in spanish. 
-      Do not limit the background location to Spain. Include other Spanish speaking countries, or even countries where Spanish isn't the main language
-      but a very common second language.
-
-      Respond with a in json using the following two keys in english
-      name:
-      background:
-    `;
-
-    const assistantResponse = await this.chatService.getGPT4Response(backgroundPrompt);
-    console.log("Raw GPT-4 response: ", assistantResponse)
-
-    try {
-      // Find the indices where 'name:' and 'background:' start
-    const nameIndex = assistantResponse.indexOf('"name":') + 7
-    const backgroundIndex = assistantResponse.indexOf('"background":') + 15
-
-    // Extract the name and background based on the indices
-    name = assistantResponse.slice(nameIndex+2, backgroundIndex - 19).trim(); // Extract name, subtracting 'background:'
-    background = assistantResponse.slice(backgroundIndex, assistantResponse.length-2).trim(); // Extract background from the start of 'background:'
-
-    console.log(`Extracted Name: ${name}`);
-    console.log(`Extracted Background: ${background}`);
-  } catch (error) {
-    console.error('Failed to extract name and background from GPT-4 response:', error);
-  }
-
-    const instructions = `
-    You are a language partner for an end user that knows English but wants to learn Spanish.
-
-    The following is a profile of your personality, interests, as well as background history. 
-    Personality: ${personality}
-    Interests: ${interests.join(', ')}
-    Background: ${background}.
+    const instructions = `You are a conversational language partner for an English speaker that is learning ${assistantData.language}. You are going to
+    be given a background, relationships, and a weekly schedule in your Vector Database. 
     
-    Use this profile to provide interesting and engaging conversations to the end user in Spanish.`
+    You are being sent a text message from your language partner. Please use the background, relationships, weekly schedule and conversation context
+    to decide how best to reply in ${assistantData.language}`
 
-    // Create assistant object locally
-    const chatAssistant = new this.chatAssistantModel({
-      assistantId: assistantId,
-      name: name,
-      personality,
-      interests,
+    const backgroundFilePath = './backgroundHistory.txt';
+    const relationshipsFilePath = './relationships.json';
+    const scheduleFilePath = './weeklySchedule.json';
+
+    fs.writeFileSync(backgroundFilePath, backgroundHistory);
+    fs.writeFileSync(relationshipsFilePath, JSON.stringify(relationships));
+    fs.writeFileSync(scheduleFilePath, JSON.stringify(weeklySchedule));
+
+    const backgroundFile = await this.openAIService.uploadAssistantFile(backgroundFilePath)
+    const relationshipsFile = await this.openAIService.uploadAssistantFile(relationshipsFilePath);
+    const scheduleFile = await this.openAIService.uploadAssistantFile(scheduleFilePath);
+
+    const vectorStore = await this.openAIService.createVectorStore([backgroundFile.id, relationshipsFile.id, scheduleFile.id])
+
+    const thread = await this.openAIService.createThread({vector_store_ids: [vectorStore.id]})
+
+    const newAssistant = new this.assistantModel({
+      ...assistantData,
+      name,
+      threadId: thread.id,
+      vectorId: vectorStore.id,
       userId,
-      instructions: instructions.trim(),
-      background: background
+      backgroundHistory,
+      relationships,
+      weeklySchedule,
     });
 
-    const openaiResponse = await this.openai.beta.assistants.create({
-    instructions: chatAssistant.instructions,
-    name: chatAssistant.name,
-    model: 'gpt-4o',
-    });
-
-    chatAssistant.assistantId = openaiResponse.id
-
-    await chatAssistant.save();
-    console.log(chatAssistant)
+    return newAssistant.save();
   }
 
-  // Method to fetch all assistants for a user
-  async getAllAssistantsForUser(userId: string): Promise<ChatAssistant[]> {
-    return this.chatAssistantModel.find({ userId }).exec();  // Find all assistants with the userId
+  // Get an assistant
+  async getAssistantById(assistantId: string): Promise<ChatAssistant> {
+    this.logger.log(`Fetching assistant by id: ${assistantId}`);
+    return this.assistantModel.findOne({assistantId}).exec();
   }
+
+  // List all assistants for a specific userId
+  async listAssistantsByUser(userId: string): Promise<ChatAssistant[]> {
+    this.logger.log(`Listing all assistants for user: ${userId}`);
+    return this.assistantModel.find({ userId }).exec();
+  }
+
+  // Update an assistant's traits (e.g., interests, personality) before creation
+  async updateAssistant(assistantId: string, updateData: Partial<ChatAssistant>): Promise<ChatAssistant> {
+    this.logger.log(`Updating assistant with id: ${assistantId}`);
+    return this.assistantModel.findOneAndUpdate({ assistantId }, updateData, { new: true }).exec();
+  }
+
+  // Delete an assistant
+  async deleteAssistant(assistantId: string): Promise<void> {
+    this.logger.log(`Deleting assistant with id: ${assistantId}`);
+    await this.assistantModel.deleteOne({ assistantId }).exec();
+  }
+
+  async generateName(
+    personality: string[],
+    interests: string[],
+    gender: string,
+    age: number,
+    language: string
+  ): Promise<string> {
+    const prompt = `
+      Generate an appropriate name for a person living in a culture dominated by ${language}:
+      - Gender: ${gender}
+      - Age: ${age}
+      - Personality traits: ${personality}
+      - Interests: ${interests}`
+
+  return await this.openAIService.generateCompletion(prompt);
+  }
+
+  async generateBackground(
+    personality: string[],
+    interests: string[],
+    gender: string,
+    age: number,
+    language: string,
+    name: string
+  ): Promise<string> {
+    const prompt = `
+      Write a short autobiographical background story written in ${language} for a person named ${name} with the following attributes:
+      - Gender: ${gender}
+      - Age: ${age}
+      - Personality traits: ${personality}
+      - Interests: ${interests}
+      
+      The story should be written in the first person, in ${language}, and reflect the person's upbringing, key life experiences, and values. 
+      It should incorporate the person's cultural background and be consistent with the customs of the ${language} culture.`;
+
+    return await this.openAIService.generateCompletion(prompt);
+  }
+  
+
+  async generateRelationships(
+    personality: string[],
+    interests: string[],
+    gender: string,
+    age: number,
+    language: string,
+    background: string,
+  ): Promise<string> {
+    const prompt = `
+      Analyze this autobiographical background for a character with the following attributes:
+      - Gender: ${gender}
+      - Age: ${age}
+      - Personality traits: ${personality}
+      - Interests: ${interests} 
+      - Background: "${background}"
+
+      Now, write a short list in ${language} of important relationships based on that background. If any specific relationships are mentioned 
+      please include them in the list, if any details about that relationship description is missing please generate it. If it is a group of people, such as 
+      a group of friends or coworkers, please generate individuals within that group and a description for them as well.
+
+      For each relationship, describe:
+      1. Their name
+      2. Their relationship with the character
+      3. The impact their relationship has had on the character's life
+      
+      Return it is a json object with the first value being the relation's name like this:
+      
+      Relationships: {
+        "Axel Cubillo": {
+            "Relation": "Padre",
+            "Influence": "Ha esta por su lado hasta siempre"
+            },
+        "Isabela Frances": {
+            "Relation": "Amgia",
+            "Influence": "Una amiga de escuela"
+            },    
+        }`;
+  
+    return await this.openAIService.generateCompletion(prompt);
+  }
+  
+  async generateWeeklySchedule(
+    personality: string[],
+    interests: string[],
+    gender: string,
+    age: number,
+    language: string,
+    backgroundHistory: string,
+    relationips: string,
+  ): Promise<string> {
+    const prompt = `
+      Write a short weekly schedule for a chatbot with the following attributes, written in ${language}:
+      - Gender: ${gender}
+      - Age: ${age}
+      - Personality traits: ${personality}
+      - Interests: ${interests}
+      - Background History: ${backgroundHistory}
+      - Relationships: ${relationips}
+      - Target language: ${language}
+
+      
+      The schedule should include daily activities that reflect the chatbot's personality, hobbies, and interests, background history, and relationships.
+      It should also include cultural practices and routines specific to the ${language} culture, such as social gatherings, rest times (like siesta), and other customs.
+
+      Respond with a json object that has each day of the week (Sunday - Saturday) listed as the initial value, like this:
+
+      "Schedule": {
+        "Sunday": {
+          "8:00": "Desayunar con mi familia",
+          "9:00": "Sale la casa por iglesia",
+          }
+        }
+    `;
+  
+    return await this.openAIService.generateCompletion(prompt);
+  }
+  
 }
