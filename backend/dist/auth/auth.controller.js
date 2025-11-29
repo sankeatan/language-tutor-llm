@@ -26,11 +26,13 @@ let AuthController = class AuthController {
         return { message: 'User registered successfully', user };
     }
     async login(body) {
-        const { token, userId } = await this.authService.login(body.email, body.password);
-        return { token, userId };
+        const { accessToken, refreshToken, userId } = await this.authService.login(body.email, body.password);
+        console.log('Auth Controller Access Token:', accessToken);
+        console.log('Auth Controller Refresh Token:', refreshToken);
+        return { accessToken, refreshToken, userId };
     }
     verifyToken(req) {
-        const token = req.cookies['token'];
+        const token = req.cookies?.['token'];
         if (!token) {
             throw new common_1.UnauthorizedException('No token provided');
         }
@@ -43,6 +45,15 @@ let AuthController = class AuthController {
         catch (err) {
             throw new common_1.UnauthorizedException('Invalid token');
         }
+    }
+    async refreshToken(refreshToken) {
+        console.log('Received refresh token for refresh:', refreshToken);
+        const tokens = await this.authService.refreshToken(refreshToken);
+        if (!tokens) {
+            throw new common_1.UnauthorizedException('Invalid refresh token');
+        }
+        console.log('Refreshed tokens:', tokens);
+        return tokens;
     }
     logout(res) {
         res.clearCookie('token');
@@ -71,6 +82,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "verifyToken", null);
+__decorate([
+    (0, common_1.Post)('refresh-token'),
+    __param(0, (0, common_1.Body)('refreshToken')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "refreshToken", null);
 __decorate([
     (0, common_1.Post)('logout'),
     __param(0, (0, common_1.Res)()),

@@ -28,11 +28,6 @@ let UsersService = class UsersService {
     async findUserById(userId) {
         return this.userModel.findById(userId).exec();
     }
-    async updateConversation(userId, conversation) {
-        return this.userModel.findByIdAndUpdate(userId, {
-            $push: { conversationHistory: conversation },
-        }).exec();
-    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([

@@ -1,17 +1,19 @@
 import { ChatService } from './chat.service';
-import { CreateConversationDto } from './dto/create-conversation.dto';
-import { UpdateConversationDto } from './dto/update-conversation.dto';
+import { OpenAIService } from 'src/shared/services/openai.service';
+import { Thread } from './schemas/thread.schema';
+import { Message } from './schemas/message.schema';
 export declare class ChatController {
     private readonly chatService;
-    constructor(chatService: ChatService);
-    createConversation(createConversationDto: CreateConversationDto): Promise<{
-        conversationId: unknown;
-        conversation: import("./schemas/conversation.schema").Conversation;
+    private readonly openAIService;
+    constructor(chatService: ChatService, openAIService: OpenAIService);
+    startThread(userId: string, metadata: any): Promise<Thread>;
+    sendMessage(threadId: string, assistantId: string, content: string): Promise<Message>;
+    getMessages(threadId: string): Promise<Message[]>;
+    getLatestMessage(threadId: string): Promise<Message>;
+    deleteThread(threadId: string): Promise<{
+        message: string;
     }>;
-    getAConversationById(conversationId: string): Promise<import("./schemas/conversation.schema").Conversation>;
-    updateConversation(updateConversationDto: UpdateConversationDto): Promise<import("./schemas/conversation.schema").Conversation>;
-    getChatResponse(conversationId: string, message: string): Promise<string>;
-    deleteConversation(conversationId: string): Promise<import("./schemas/conversation.schema").Conversation>;
-    getAllConversations(userId: string): Promise<import("./schemas/conversation.schema").Conversation[]>;
-    getAConversation(assistantId: string): Promise<import("./schemas/conversation.schema").Conversation>;
+    deleteMessage(threadId: string, messageId: string): Promise<{
+        message: string;
+    }>;
 }

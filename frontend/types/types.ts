@@ -12,10 +12,11 @@ export type Message = {
   };
 
   export type ChatAssistant = {
-    id: string;
+    assistantId: string;
     userId: string;
     name: string;
     personality: string;
     interests: string;
     background: string;
+    instructions: string;
   };

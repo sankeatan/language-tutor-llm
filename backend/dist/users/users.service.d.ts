@@ -25,12 +25,10 @@
 /// <reference types="mongoose/types/inferrawdoctype" />
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
-import { UpdateConversationDto } from '../chat/dto/update-conversation.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 export declare class UsersService {
     private userModel;
     constructor(userModel: Model<User>);
     createUser(createUserDto: CreateUserDto): Promise<User>;
     findUserById(userId: string): Promise<User>;
-    updateConversation(userId: string, conversation: UpdateConversationDto): Promise<User>;
 }

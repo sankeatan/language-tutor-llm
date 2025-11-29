@@ -45,12 +45,17 @@ export declare class AuthController {
         email: string;
         password: string;
     }): Promise<{
-        token: string;
+        accessToken: string;
+        refreshToken: string;
         userId: import("mongoose").Types.ObjectId;
     }>;
     verifyToken(req: Request): {
         valid: boolean;
         decoded: any;
     };
+    refreshToken(refreshToken: string): Promise<{
+        accessToken: string;
+        refreshToken: string;
+    }>;
     logout(res: Response): Response<any, Record<string, any>>;
 }

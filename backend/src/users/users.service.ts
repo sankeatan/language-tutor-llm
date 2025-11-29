@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
-import { UpdateConversationDto } from '../chat/dto/update-conversation.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
@@ -17,11 +16,5 @@ export class UsersService {
 
   async findUserById(userId: string): Promise<User> {
     return this.userModel.findById(userId).exec();
-  }
-
-  async updateConversation(userId: string, conversation: UpdateConversationDto): Promise<User> {
-    return this.userModel.findByIdAndUpdate(userId, {
-      $push: { conversationHistory: conversation },
-    }).exec();
   }
 }

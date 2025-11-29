@@ -1,5 +1,3 @@
-// components/NewConversationScreen.tsx
-
 import { Button } from "@/components/ui/button";
 import { MicIcon, PaperclipIcon, SendIcon } from "lucide-react";
 

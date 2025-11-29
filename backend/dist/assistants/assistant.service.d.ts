@@ -24,14 +24,20 @@
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose/types/inferrawdoctype" />
 import { Model } from 'mongoose';
-import { ChatAssistant } from './schemas/chat-assistant.schema';
-import { CreateChatAssistantDto } from './dto/create-chat-assistant.dto';
-import { ChatService } from '../chat/chat.service';
+import { ChatAssistant, ChatAssistantDocument } from './schemas/chat-assistant.schema';
+import { OpenAIService } from 'src/shared/services/openai.service';
 export declare class AssistantService {
-    private chatAssistantModel;
-    private readonly chatService;
-    private openai;
-    constructor(chatAssistantModel: Model<ChatAssistant>, chatService: ChatService);
-    generateChatAssistant(createChatAssistantDto: CreateChatAssistantDto): Promise<void>;
-    getAllAssistantsForUser(userId: string): Promise<ChatAssistant[]>;
+    private assistantModel;
+    private readonly openAIService;
+    private readonly logger;
+    constructor(assistantModel: Model<ChatAssistantDocument>, openAIService: OpenAIService);
+    createAssistant(userId: string, assistantData: Partial<ChatAssistant>): Promise<ChatAssistant>;
+    getAssistantById(assistantId: string): Promise<ChatAssistant>;
+    listAssistantsByUser(userId: string): Promise<ChatAssistant[]>;
+    updateAssistant(assistantId: string, updateData: Partial<ChatAssistant>): Promise<ChatAssistant>;
+    deleteAssistant(assistantId: string): Promise<void>;
+    generateName(personality: string[], interests: string[], gender: string, age: number, language: string): Promise<string>;
+    generateBackground(personality: string[], interests: string[], gender: string, age: number, language: string, name: string): Promise<string>;
+    generateRelationships(personality: string[], interests: string[], gender: string, age: number, language: string, background: string): Promise<string>;
+    generateWeeklySchedule(personality: string[], interests: string[], gender: string, age: number, language: string, backgroundHistory: string, relationips: string): Promise<string>;
 }

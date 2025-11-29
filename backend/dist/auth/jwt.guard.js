@@ -12,11 +12,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.JwtAuthGuard = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
+const config_1 = require("@nestjs/config");
 let JwtAuthGuard = class JwtAuthGuard {
-    constructor(jwtService) {
+    constructor(jwtService, configService) {
         this.jwtService = jwtService;
+        this.configService = configService;
     }
     canActivate(context) {
+        const enableAuth = this.configService.get('ENABLE_AUTH');
+        if (!enableAuth) {
+            console.log('Authentication disabled, allowing all requests.');
+            return true;
+        }
         const request = context.switchToHttp().getRequest();
         const token = request.cookies['token'];
         if (!token) {
@@ -35,6 +42,6 @@ let JwtAuthGuard = class JwtAuthGuard {
 exports.JwtAuthGuard = JwtAuthGuard;
 exports.JwtAuthGuard = JwtAuthGuard = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [jwt_1.JwtService])
+    __metadata("design:paramtypes", [jwt_1.JwtService, config_1.ConfigService])
 ], JwtAuthGuard);
 //# sourceMappingURL=jwt.guard.js.map

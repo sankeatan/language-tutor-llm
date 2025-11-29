@@ -11,14 +11,21 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatAssistantSchema = exports.ChatAssistant = void 0;
 const mongoose_1 = require("@nestjs/mongoose");
-const mongoose_2 = require("mongoose");
-let ChatAssistant = class ChatAssistant extends mongoose_2.Document {
+let ChatAssistant = class ChatAssistant {
 };
 exports.ChatAssistant = ChatAssistant;
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
-], ChatAssistant.prototype, "assistantId", void 0);
+], ChatAssistant.prototype, "userId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], ChatAssistant.prototype, "threadId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], ChatAssistant.prototype, "vectorId", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
@@ -26,23 +33,31 @@ __decorate([
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
-], ChatAssistant.prototype, "userId", void 0);
+], ChatAssistant.prototype, "gender", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ required: false }),
-    __metadata("design:type", String)
-], ChatAssistant.prototype, "instructions", void 0);
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", Number)
+], ChatAssistant.prototype, "age", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
-], ChatAssistant.prototype, "personality", void 0);
+], ChatAssistant.prototype, "language", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", Array)
 ], ChatAssistant.prototype, "interests", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", Array)
+], ChatAssistant.prototype, "personalityTraits", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
     __metadata("design:type", String)
-], ChatAssistant.prototype, "background", void 0);
+], ChatAssistant.prototype, "backgroundHistory", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", Array)
+], ChatAssistant.prototype, "relationships", void 0);
 exports.ChatAssistant = ChatAssistant = __decorate([
     (0, mongoose_1.Schema)()
 ], ChatAssistant);

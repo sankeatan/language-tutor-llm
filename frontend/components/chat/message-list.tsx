@@ -1,5 +1,3 @@
-// components/MessageList.tsx
-
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Message = {

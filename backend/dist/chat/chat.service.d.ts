@@ -24,18 +24,19 @@
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose/types/inferrawdoctype" />
 import { Model } from 'mongoose';
-import { Conversation } from './schemas/conversation.schema';
-import { CreateConversationDto } from './dto/create-conversation.dto';
-import { UpdateConversationDto } from './dto/update-conversation.dto';
+import { Thread, ThreadDocument } from './schemas/thread.schema';
+import { Message, MessageDocument } from './schemas/message.schema';
+import { OpenAIService } from '../shared/services/openai.service';
 export declare class ChatService {
-    private conversationModel;
-    private openai;
-    constructor(conversationModel: Model<Conversation>);
-    createConversation(dto: CreateConversationDto): Promise<Conversation>;
-    getGPT4Response(message: string, conversationId?: string): Promise<string>;
-    updateConversation(dto: UpdateConversationDto): Promise<Conversation>;
-    deleteConversation(conversationId: string): Promise<Conversation>;
-    getAllConversations(userId: string): Promise<Conversation[]>;
-    getAConversationByAssistantId(assistant: string): Promise<Conversation>;
-    getAConversationById(conversationId: string): Promise<Conversation>;
+    private threadModel;
+    private messageModel;
+    private readonly openAIService;
+    private readonly logger;
+    constructor(threadModel: Model<ThreadDocument>, messageModel: Model<MessageDocument>, openAIService: OpenAIService);
+    createThread(thread: Thread): Promise<Thread>;
+    addMessage(message: Message): Promise<Message>;
+    handleUserMessage(threadId: string, assistantId: string, content: string): Promise<Message>;
+    getMessages(threadId: string): Promise<Message[]>;
+    deleteThread(threadId: string): Promise<void>;
+    deleteMessage(threadId: string, messageId: string): Promise<void>;
 }

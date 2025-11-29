@@ -11,98 +11,156 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var AssistantService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AssistantService = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
-const openai_1 = require("openai");
 const chat_assistant_schema_1 = require("./schemas/chat-assistant.schema");
-const chat_service_1 = require("../chat/chat.service");
-let AssistantService = class AssistantService {
-    constructor(chatAssistantModel, chatService) {
-        this.chatAssistantModel = chatAssistantModel;
-        this.chatService = chatService;
-        this.openai = new openai_1.OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai_service_1 = require("../shared/services/openai.service");
+const fs = require("fs");
+let AssistantService = AssistantService_1 = class AssistantService {
+    constructor(assistantModel, openAIService) {
+        this.assistantModel = assistantModel;
+        this.openAIService = openAIService;
+        this.logger = new common_1.Logger(AssistantService_1.name);
     }
-    async generateChatAssistant(createChatAssistantDto) {
-        const { personality, interests, userId, gender, age } = createChatAssistantDto;
-        let name = 'Generating...';
-        let background = 'Generating...';
-        let assistantId = 'Generating...';
-        const backgroundPrompt = `
-      Please help complete the profile of a contemporary spanish language speaker.
-      I would like you to generate a name, as well as history and background that are culturally appropriate for a spanish speaker.
-      I am going to give you a personality trait and list of interests and a gender that you are going to incorporate into the history and background.
-      If the value for any of these profile key's is "GPT Choice" then I'd like you to insert your own choice for that value.
-
-      Profile
-      Personality: ${personality}
-      Interests: ${interests.join(', ')}
-      Gender: ${gender}
-      Age Range: ${age}
-
-      When generating the name please take gender into account.
-
-      When writing the history please include birth year, birth place, current country, relatives, notable current and past friends, 
-      notable current and past jobs, and any other details that can help give the profile a detailed history. When generating the birth year 
-      take the age of the user into account. Subtract it from the current year of 2024. Give the response only in spanish. 
-      Do not limit the background location to Spain. Include other Spanish speaking countries, or even countries where Spanish isn't the main language
-      but a very common second language.
-
-      Respond with a in json using the following two keys in english
-      name:
-      background:
-    `;
-        const assistantResponse = await this.chatService.getGPT4Response(backgroundPrompt);
-        console.log("Raw GPT-4 response: ", assistantResponse);
-        try {
-            const nameIndex = assistantResponse.indexOf('"name":') + 7;
-            const backgroundIndex = assistantResponse.indexOf('"background":') + 15;
-            name = assistantResponse.slice(nameIndex + 2, backgroundIndex - 19).trim();
-            background = assistantResponse.slice(backgroundIndex, assistantResponse.length - 2).trim();
-            console.log(`Extracted Name: ${name}`);
-            console.log(`Extracted Background: ${background}`);
-        }
-        catch (error) {
-            console.error('Failed to extract name and background from GPT-4 response:', error);
-        }
-        const instructions = `
-    You are a language partner for an end user that knows English but wants to learn Spanish.
-
-    The following is a profile of your personality, interests, as well as background history. 
-    Personality: ${personality}
-    Interests: ${interests.join(', ')}
-    Background: ${background}.
+    async createAssistant(userId, assistantData) {
+        this.logger.log(`Creating assistant for user: ${userId}`);
+        const name = await this.generateName(assistantData.personalityTraits, assistantData.interests, assistantData.gender, assistantData.age, assistantData.language);
+        const backgroundHistory = await this.generateBackground(assistantData.personalityTraits, assistantData.interests, assistantData.gender, assistantData.age, assistantData.language, name.toString());
+        const relationships = await this.generateRelationships(assistantData.personalityTraits, assistantData.interests, assistantData.gender, assistantData.age, assistantData.language, backgroundHistory.toString());
+        const weeklySchedule = await this.generateWeeklySchedule(assistantData.personalityTraits, assistantData.interests, assistantData.gender, assistantData.age, assistantData.language, backgroundHistory.toString(), relationships.toString());
+        const instructions = `You are a conversational language partner for an English speaker that is learning ${assistantData.language}. You are going to
+    be given a background, relationships, and a weekly schedule in your Vector Database. 
     
-    Use this profile to provide interesting and engaging conversations to the end user in Spanish.`;
-        const chatAssistant = new this.chatAssistantModel({
-            assistantId: assistantId,
-            name: name,
-            personality,
-            interests,
+    You are being sent a text message from your language partner. Please use the background, relationships, weekly schedule and conversation context
+    to decide how best to reply in ${assistantData.language}`;
+        const backgroundFilePath = './backgroundHistory.txt';
+        const relationshipsFilePath = './relationships.json';
+        const scheduleFilePath = './weeklySchedule.json';
+        fs.writeFileSync(backgroundFilePath, backgroundHistory);
+        fs.writeFileSync(relationshipsFilePath, JSON.stringify(relationships));
+        fs.writeFileSync(scheduleFilePath, JSON.stringify(weeklySchedule));
+        const backgroundFile = await this.openAIService.uploadAssistantFile(backgroundFilePath);
+        const relationshipsFile = await this.openAIService.uploadAssistantFile(relationshipsFilePath);
+        const scheduleFile = await this.openAIService.uploadAssistantFile(scheduleFilePath);
+        const vectorStore = await this.openAIService.createVectorStore([backgroundFile.id, relationshipsFile.id, scheduleFile.id]);
+        const thread = await this.openAIService.createThread({ vector_store_ids: [vectorStore.id] });
+        const newAssistant = new this.assistantModel({
+            ...assistantData,
+            name,
+            threadId: thread.id,
+            vectorId: vectorStore.id,
             userId,
-            instructions: instructions.trim(),
-            background: background
+            backgroundHistory,
+            relationships,
+            weeklySchedule
         });
-        const openaiResponse = await this.openai.beta.assistants.create({
-            instructions: chatAssistant.instructions,
-            name: chatAssistant.name,
-            model: 'gpt-4o',
-        });
-        chatAssistant.assistantId = openaiResponse.id;
-        await chatAssistant.save();
-        console.log(chatAssistant);
+        return newAssistant.save();
     }
-    async getAllAssistantsForUser(userId) {
-        return this.chatAssistantModel.find({ userId }).exec();
+    async getAssistantById(assistantId) {
+        this.logger.log(`Fetching assistant by id: ${assistantId}`);
+        return this.assistantModel.findOne({ assistantId }).exec();
+    }
+    async listAssistantsByUser(userId) {
+        this.logger.log(`Listing all assistants for user: ${userId}`);
+        return this.assistantModel.find({ userId }).exec();
+    }
+    async updateAssistant(assistantId, updateData) {
+        this.logger.log(`Updating assistant with id: ${assistantId}`);
+        return this.assistantModel.findOneAndUpdate({ assistantId }, updateData, { new: true }).exec();
+    }
+    async deleteAssistant(assistantId) {
+        this.logger.log(`Deleting assistant with id: ${assistantId}`);
+        await this.assistantModel.deleteOne({ assistantId }).exec();
+    }
+    async generateName(personality, interests, gender, age, language) {
+        const prompt = `
+      Generate an appropriate name for a person living in a culture dominated by ${language}:
+      - Gender: ${gender}
+      - Age: ${age}
+      - Personality traits: ${personality}
+      - Interests: ${interests}`;
+        return await this.openAIService.generateCompletion(prompt);
+    }
+    async generateBackground(personality, interests, gender, age, language, name) {
+        const prompt = `
+      Write a short autobiographical background story written in ${language} for a person named ${name} with the following attributes:
+      - Gender: ${gender}
+      - Age: ${age}
+      - Personality traits: ${personality}
+      - Interests: ${interests}
+      
+      The story should be written in the first person, in ${language}, and reflect the person's upbringing, key life experiences, and values. 
+      It should incorporate the person's cultural background and be consistent with the customs of the ${language} culture.`;
+        return await this.openAIService.generateCompletion(prompt);
+    }
+    async generateRelationships(personality, interests, gender, age, language, background) {
+        const prompt = `
+      Analyze this autobiographical background for a character with the following attributes:
+      - Gender: ${gender}
+      - Age: ${age}
+      - Personality traits: ${personality}
+      - Interests: ${interests} 
+      - Background: "${background}"
+
+      Now, write a short list in ${language} of important relationships based on that background. If any specific relationships are mentioned 
+      please include them in the list, if any details about that relationship description is missing please generate it. If it is a group of people, such as 
+      a group of friends or coworkers, please generate individuals within that group and a description for them as well.
+
+      For each relationship, describe:
+      1. Their name
+      2. Their relationship with the character
+      3. The impact their relationship has had on the character's life
+      
+      Return it is a json object with the first value being the relation's name like this:
+      
+      Relationships: {
+        "Axel Cubillo": {
+            "Relation": "Padre",
+            "Influence": "Ha esta por su lado hasta siempre"
+            },
+        "Isabela Frances": {
+            "Relation": "Amgia",
+            "Influence": "Una amiga de escuela"
+            },    
+        }`;
+        return await this.openAIService.generateCompletion(prompt);
+    }
+    async generateWeeklySchedule(personality, interests, gender, age, language, backgroundHistory, relationips) {
+        const prompt = `
+      Write a short weekly schedule for a chatbot with the following attributes, written in ${language}:
+      - Gender: ${gender}
+      - Age: ${age}
+      - Personality traits: ${personality}
+      - Interests: ${interests}
+      - Background History: ${backgroundHistory}
+      - Relationships: ${relationips}
+      - Target language: ${language}
+
+      
+      The schedule should include daily activities that reflect the chatbot's personality, hobbies, and interests, background history, and relationships.
+      It should also include cultural practices and routines specific to the ${language} culture, such as social gatherings, rest times (like siesta), and other customs.
+
+      Respond with a json object that has each day of the week (Sunday - Saturday) listed as the initial value, like this:
+
+      "Schedule": {
+        "Sunday": {
+          "8:00": "Desayunar con mi familia",
+          "9:00": "Sale la casa por iglesia",
+          }
+        }
+    `;
+        return await this.openAIService.generateCompletion(prompt);
     }
 };
 exports.AssistantService = AssistantService;
-exports.AssistantService = AssistantService = __decorate([
+exports.AssistantService = AssistantService = AssistantService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(chat_assistant_schema_1.ChatAssistant.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
-        chat_service_1.ChatService])
+        openai_service_1.OpenAIService])
 ], AssistantService);
 //# sourceMappingURL=assistant.service.js.map

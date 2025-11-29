@@ -11,96 +11,65 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var ChatService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatService = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
-const conversation_schema_1 = require("./schemas/conversation.schema");
-const openai_1 = require("openai");
-let ChatService = class ChatService {
-    constructor(conversationModel) {
-        this.conversationModel = conversationModel;
-        this.openai = new openai_1.OpenAI({
-            apiKey: process.env.OPENAI_API_KEY,
+const thread_schema_1 = require("./schemas/thread.schema");
+const message_schema_1 = require("./schemas/message.schema");
+const openai_service_1 = require("../shared/services/openai.service");
+let ChatService = ChatService_1 = class ChatService {
+    constructor(threadModel, messageModel, openAIService) {
+        this.threadModel = threadModel;
+        this.messageModel = messageModel;
+        this.openAIService = openAIService;
+        this.logger = new common_1.Logger(ChatService_1.name);
+    }
+    async createThread(thread) {
+        this.logger.log(`Creating thread for user: ${thread.userId}`);
+        const newThread = new this.threadModel({
+            userId: thread.userId,
+            metadata: thread.metadata
         });
+        return newThread.save();
     }
-    async createConversation(dto) {
-        const newConversation = new this.conversationModel({
-            userId: dto.userId,
-            messages: dto.messages,
-            lastUsed: Date.now(),
-            assistant: dto.assistant,
-            assistantName: dto.assistantName
+    async addMessage(message) {
+        this.logger.log(`Adding message to thread ${message.threadId}`);
+        const newMessage = new this.messageModel({
+            threadId: message.threadId,
+            role: message.role === "user" ? "user" : "assistant",
+            content: message.content,
+            timestamp: message.timestamp || new Date()
         });
-        const savedConversation = await newConversation.save();
-        const conversationId = savedConversation._id;
-        const userMessage = savedConversation.messages[0].content;
-        const gptResponse = await this.getGPT4Response(conversationId.toString(), userMessage);
-        savedConversation.messages.push({ role: 'assistant', content: gptResponse });
-        await savedConversation.save();
-        return savedConversation;
+        return newMessage.save();
     }
-    async getGPT4Response(message, conversationId) {
-        try {
-            const response = await this.openai.chat.completions.create({
-                model: 'gpt-4',
-                messages: [{ role: 'user', content: message }],
-            });
-            const reply = response.choices[0].message?.content || 'No response from GPT-4';
-            console.log(reply);
-            if (conversationId) {
-                await this.updateConversation({
-                    conversationId: conversationId,
-                    messages: [
-                        { role: 'user', content: message },
-                        { role: 'assistant', content: reply },
-                    ],
-                });
-            }
-            return reply;
-        }
-        catch (error) {
-            console.error('Error communicating with OpenAI API', error);
-            throw new Error('Failed to get response from GPT-4');
-        }
+    async handleUserMessage(threadId, assistantId, content) {
+        await this.addMessage({ threadId, role: 'user', content, timestamp: new Date });
+        await this.openAIService.appendMessageToThread(threadId, { role: 'user', content });
+        const assistantResponse = await this.openAIService.runAssistantOnThread(threadId, assistantId);
+        return this.addMessage({ threadId, role: 'assistant', content: assistantResponse.content, timestamp: new Date });
     }
-    async updateConversation(dto) {
-        const conversation = await this.conversationModel.findByIdAndUpdate(dto.conversationId, {
-            $push: { messages: dto.messages[0] },
-            lastUsed: Date.now(),
-        }, { new: true }).exec();
-        if (!conversation) {
-            throw new Error('Conversation not found');
-        }
-        conversation.messages.push(...dto.messages);
-        await conversation.save();
-        return conversation;
+    async getMessages(threadId) {
+        this.logger.log(`Fetching messages for thread ${threadId}`);
+        return this.messageModel.find({ threadId }).exec();
     }
-    async deleteConversation(conversationId) {
-        return this.conversationModel.findByIdAndDelete(conversationId);
+    async deleteThread(threadId) {
+        await this.threadModel.findByIdAndDelete(threadId).exec();
+        await this.messageModel.deleteMany({ threadId }).exec();
     }
-    async getAllConversations(userId) {
-        console.log("Fetching conversations for userId:", userId);
-        const conversations = await this.conversationModel.find({ userId }).select('assistant messages lastUsed assistantName').exec();
-        console.log("Found conversations:", conversations);
-        return conversations;
-    }
-    async getAConversationByAssistantId(assistant) {
-        console.log(`Fetching conversations for ${assistant}`);
-        const conversation = await this.conversationModel.findOne({ assistant }).select('messages');
-        return conversation;
-    }
-    async getAConversationById(conversationId) {
-        console.log(`Fetching conversations for ${conversationId}`);
-        const conversation = await this.conversationModel.findById({ conversationId }).select('messages');
-        return conversation;
+    async deleteMessage(threadId, messageId) {
+        await this.messageModel.findOneAndDelete({ _id: messageId, threadId }).exec();
     }
 };
 exports.ChatService = ChatService;
-exports.ChatService = ChatService = __decorate([
+exports.ChatService = ChatService = ChatService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, mongoose_1.InjectModel)(conversation_schema_1.Conversation.name)),
-    __metadata("design:paramtypes", [mongoose_2.Model])
+    __param(0, (0, mongoose_1.InjectModel)(thread_schema_1.Thread.name)),
+    __param(1, (0, mongoose_1.InjectModel)(message_schema_1.Message.name)),
+    __metadata("design:paramtypes", [mongoose_2.Model,
+        mongoose_2.Model,
+        openai_service_1.OpenAIService])
 ], ChatService);
 //# sourceMappingURL=chat.service.js.map

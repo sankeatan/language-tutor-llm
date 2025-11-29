@@ -14,97 +14,85 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatController = void 0;
 const common_1 = require("@nestjs/common");
-const passport_1 = require("@nestjs/passport");
 const chat_service_1 = require("./chat.service");
-const create_conversation_dto_1 = require("./dto/create-conversation.dto");
-const update_conversation_dto_1 = require("./dto/update-conversation.dto");
+const openai_service_1 = require("../shared/services/openai.service");
 let ChatController = class ChatController {
-    constructor(chatService) {
+    constructor(chatService, openAIService) {
         this.chatService = chatService;
+        this.openAIService = openAIService;
     }
-    async createConversation(createConversationDto) {
-        const conversation = await this.chatService.createConversation(createConversationDto);
-        return { conversationId: conversation._id, conversation };
+    async startThread(userId, metadata) {
+        const thread = { userId, metadata, createdAt: new Date() };
+        return this.chatService.createThread(thread);
     }
-    async getAConversationById(conversationId) {
-        return this.chatService.getAConversationById(conversationId);
+    async sendMessage(threadId, assistantId, content) {
+        return this.chatService.handleUserMessage(threadId, assistantId, content);
     }
-    async updateConversation(updateConversationDto) {
-        return this.chatService.updateConversation(updateConversationDto);
+    async getMessages(threadId) {
+        return this.chatService.getMessages(threadId);
     }
-    async getChatResponse(conversationId, message) {
-        return this.chatService.getGPT4Response(conversationId, message);
+    async getLatestMessage(threadId) {
+        return this.openAIService.getLatestMessage(threadId);
     }
-    async deleteConversation(conversationId) {
-        return this.chatService.deleteConversation(conversationId);
+    async deleteThread(threadId) {
+        await this.chatService.deleteThread(threadId);
+        return { message: `Thread ${threadId} deleted successfully` };
     }
-    async getAllConversations(userId) {
-        return this.chatService.getAllConversations(userId);
-    }
-    async getAConversation(assistantId) {
-        return this.chatService.getAConversationByAssistantId(assistantId);
+    async deleteMessage(threadId, messageId) {
+        await this.chatService.deleteMessage(threadId, messageId);
+        return { message: `Message ${messageId} from thread ${threadId} deleted successfully` };
     }
 };
 exports.ChatController = ChatController;
 __decorate([
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
-    (0, common_1.Post)('create'),
-    __param(0, (0, common_1.Body)()),
+    (0, common_1.Post)('start'),
+    __param(0, (0, common_1.Body)('userId')),
+    __param(1, (0, common_1.Body)('metadata')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_conversation_dto_1.CreateConversationDto]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
-], ChatController.prototype, "createConversation", null);
+], ChatController.prototype, "startThread", null);
 __decorate([
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
-    (0, common_1.Get)(':conversationId'),
-    __param(0, (0, common_1.Param)('conversationId')),
+    (0, common_1.Post)(':threadId/message'),
+    __param(0, (0, common_1.Param)('threadId')),
+    __param(1, (0, common_1.Body)('assistantId')),
+    __param(2, (0, common_1.Body)('content')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], ChatController.prototype, "sendMessage", null);
+__decorate([
+    (0, common_1.Get)(':threadId/messages'),
+    __param(0, (0, common_1.Param)('threadId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], ChatController.prototype, "getAConversationById", null);
+], ChatController.prototype, "getMessages", null);
 __decorate([
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
-    (0, common_1.Put)(':conversationId'),
-    __param(0, (0, common_1.Body)()),
+    (0, common_1.Get)(':threadId/latest'),
+    __param(0, (0, common_1.Param)('threadId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [update_conversation_dto_1.UpdateConversationDto]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], ChatController.prototype, "updateConversation", null);
+], ChatController.prototype, "getLatestMessage", null);
 __decorate([
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
-    (0, common_1.Post)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)('message')),
+    (0, common_1.Delete)(':threadId'),
+    __param(0, (0, common_1.Param)('threadId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ChatController.prototype, "deleteThread", null);
+__decorate([
+    (0, common_1.Delete)(':threadId/message/:messageId'),
+    __param(0, (0, common_1.Param)('threadId')),
+    __param(1, (0, common_1.Param)('messageId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
-], ChatController.prototype, "getChatResponse", null);
-__decorate([
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ChatController.prototype, "deleteConversation", null);
-__decorate([
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
-    (0, common_1.Get)('user/:userId'),
-    __param(0, (0, common_1.Param)('userId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ChatController.prototype, "getAllConversations", null);
-__decorate([
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
-    (0, common_1.Get)('assistant/:assistantId'),
-    __param(0, (0, common_1.Param)('assistantId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ChatController.prototype, "getAConversation", null);
+], ChatController.prototype, "deleteMessage", null);
 exports.ChatController = ChatController = __decorate([
     (0, common_1.Controller)('chat'),
-    __metadata("design:paramtypes", [chat_service_1.ChatService])
+    __metadata("design:paramtypes", [chat_service_1.ChatService,
+        openai_service_1.OpenAIService])
 ], ChatController);
 //# sourceMappingURL=chat.controller.js.map
